@@ -1,0 +1,117 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TIME = exports.SIGNAL = exports.LIFECYCLE = exports.PLATFORM = exports.COMMAND = exports.RESERVED = exports.DIR = exports.FILEPATH = exports.KEYWORDS = void 0;
+var KEYWORDS;
+(function (KEYWORDS) {
+    KEYWORDS["BEFORE_FILTER"] = "__befores__";
+    KEYWORDS["AFTER_FILTER"] = "__afters__";
+    KEYWORDS["GLOBAL_BEFORE_FILTER"] = "__globalBefores__";
+    KEYWORDS["GLOBAL_AFTER_FILTER"] = "__globalAfters__";
+    KEYWORDS["ROUTE"] = "__routes__";
+    KEYWORDS["BEFORE_STOP_HOOK"] = "__beforeStopHook__";
+    KEYWORDS["MODULE"] = "__modules__";
+    KEYWORDS["SERVER_MAP"] = "__serverMap__";
+    KEYWORDS["RPC_BEFORE_FILTER"] = "__rpcBefores__";
+    KEYWORDS["RPC_AFTER_FILTER"] = "__rpcAfters__";
+    KEYWORDS["MASTER_WATCHER"] = "__masterwatcher__";
+    KEYWORDS["MONITOR_WATCHER"] = "__monitorwatcher__";
+})(KEYWORDS = exports.KEYWORDS || (exports.KEYWORDS = {}));
+var FILEPATH;
+(function (FILEPATH) {
+    FILEPATH["MASTER"] = "/config/master.json";
+    FILEPATH["SERVER"] = "/config/servers.json";
+    FILEPATH["CRON"] = "/config/crons.json";
+    FILEPATH["LOG"] = "/config/log4js.json";
+    FILEPATH["SERVER_PROTOS"] = "/config/serverProtos.json";
+    FILEPATH["CLIENT_PROTOS"] = "/config/clientProtos.json";
+    FILEPATH["MASTER_HA"] = "/config/masterha.json";
+    FILEPATH["LIFECYCLE"] = "/lifecycle.js";
+    FILEPATH["SERVER_DIR"] = "/app/servers/";
+    FILEPATH["CONFIG_DIR"] = "/config";
+})(FILEPATH = exports.FILEPATH || (exports.FILEPATH = {}));
+var DIR;
+(function (DIR) {
+    DIR["HANDLER"] = "handler";
+    DIR["REMOTE"] = "remote";
+    DIR["CRON"] = "cron";
+    DIR["LOG"] = "logs";
+    DIR["SCRIPT"] = "scripts";
+    DIR["EVENT"] = "events";
+    DIR["COMPONENT"] = "components";
+})(DIR = exports.DIR || (exports.DIR = {}));
+var RESERVED;
+(function (RESERVED) {
+    RESERVED["BASE"] = "base";
+    RESERVED["MAIN"] = "main";
+    RESERVED["MASTER"] = "master";
+    RESERVED["SERVERS"] = "servers";
+    RESERVED["ENV"] = "env";
+    RESERVED["CPU"] = "cpu";
+    RESERVED["ENV_DEV"] = "development";
+    RESERVED["ENV_PRO"] = "production";
+    RESERVED["ALL"] = "all";
+    RESERVED["SERVER_TYPE"] = "serverType";
+    RESERVED["SERVER_ID"] = "serverId";
+    RESERVED["CURRENT_SERVER"] = "curServer";
+    RESERVED["MODE"] = "mode";
+    RESERVED["TYPE"] = "type";
+    RESERVED["CLUSTER"] = "clusters";
+    RESERVED["STAND_ALONE"] = "stand-alone";
+    RESERVED["BEFORE_START"] = "beforeStart";
+    RESERVED["START"] = "start";
+    RESERVED["AFTER_START"] = "afterStart";
+    RESERVED["AFTER_STARTALL"] = "afterStartAll";
+    RESERVED["CRONS"] = "crons";
+    RESERVED["ERROR_HANDLER"] = "errorHandler";
+    RESERVED["GLOBAL_ERROR_HANDLER"] = "globalErrorHandler";
+    RESERVED["AUTO_RESTART"] = "auto-restart";
+    RESERVED["RESTART_FORCE"] = "restart-force";
+    RESERVED["CLUSTER_COUNT"] = "clusterCount";
+    RESERVED["CLUSTER_PREFIX"] = "cluster-server-";
+    RESERVED["CLUSTER_SIGNAL"] = "++";
+    RESERVED["RPC_ERROR_HANDLER"] = "rpcErrorHandler";
+    RESERVED["SERVER"] = "server";
+    RESERVED["CLIENT"] = "client";
+    RESERVED["STARTID"] = "startId";
+    RESERVED["STOP_SERVERS"] = "stop_servers";
+    RESERVED["SSH_CONFIG_PARAMS"] = "ssh_config_params";
+})(RESERVED = exports.RESERVED || (exports.RESERVED = {}));
+var COMMAND;
+(function (COMMAND) {
+    COMMAND["TASKSET"] = "taskset";
+    COMMAND["KILL"] = "kill";
+    COMMAND["TASKKILL"] = "taskkill";
+    COMMAND["SSH"] = "ssh";
+})(COMMAND = exports.COMMAND || (exports.COMMAND = {}));
+var PLATFORM;
+(function (PLATFORM) {
+    PLATFORM["WIN"] = "win32";
+    PLATFORM["LINUX"] = "linux";
+})(PLATFORM = exports.PLATFORM || (exports.PLATFORM = {}));
+var LIFECYCLE;
+(function (LIFECYCLE) {
+    LIFECYCLE["BEFORE_STARTUP"] = "beforeStartup";
+    LIFECYCLE["BEFORE_SHUTDOWN"] = "beforeShutdown";
+    LIFECYCLE["AFTER_STARTUP"] = "afterStartup";
+    LIFECYCLE["AFTER_STARTALL"] = "afterStartAll";
+})(LIFECYCLE = exports.LIFECYCLE || (exports.LIFECYCLE = {}));
+var SIGNAL;
+(function (SIGNAL) {
+    SIGNAL[SIGNAL["FAIL"] = 0] = "FAIL";
+    SIGNAL[SIGNAL["OK"] = 1] = "OK";
+})(SIGNAL = exports.SIGNAL || (exports.SIGNAL = {}));
+var TIME;
+(function (TIME) {
+    TIME[TIME["TIME_WAIT_STOP"] = 3000] = "TIME_WAIT_STOP";
+    TIME[TIME["TIME_WAIT_KILL"] = 5000] = "TIME_WAIT_KILL";
+    TIME[TIME["TIME_WAIT_RESTART"] = 5000] = "TIME_WAIT_RESTART";
+    TIME[TIME["TIME_WAIT_COUNTDOWN"] = 10000] = "TIME_WAIT_COUNTDOWN";
+    TIME[TIME["TIME_WAIT_MASTER_KILL"] = 120000] = "TIME_WAIT_MASTER_KILL";
+    TIME[TIME["TIME_WAIT_MONITOR_KILL"] = 2000] = "TIME_WAIT_MONITOR_KILL";
+    TIME[TIME["TIME_WAIT_PING"] = 30000] = "TIME_WAIT_PING";
+    TIME[TIME["TIME_WAIT_MAX_PING"] = 300000] = "TIME_WAIT_MAX_PING";
+    TIME[TIME["DEFAULT_UDP_HEARTBEAT_TIME"] = 20000] = "DEFAULT_UDP_HEARTBEAT_TIME";
+    TIME[TIME["DEFAULT_UDP_HEARTBEAT_TIMEOUT"] = 100000] = "DEFAULT_UDP_HEARTBEAT_TIMEOUT";
+    TIME[TIME["DEFAULT_MQTT_HEARTBEAT_TIMEOUT"] = 90000] = "DEFAULT_MQTT_HEARTBEAT_TIMEOUT";
+})(TIME = exports.TIME || (exports.TIME = {}));
+//# sourceMappingURL=constants.js.map

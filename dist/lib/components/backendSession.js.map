@@ -1,0 +1,1 @@
+{"version":3,"file":"backendSession.js","sourceRoot":"","sources":["../../../lib/components/backendSession.ts"],"names":[],"mappings":";;;AAAA,mFAAgF;AAKhF,MAAa,uBAAwB,SAAQ,6CAAqB;IAChE,YAAY,GAAgB;QAC1B,KAAK,CAAC,GAAG,CAAC,CAAC;QAKb,SAAI,GAAG,oBAAoB,CAAC;QAJ1B,6DAA6D;QAC7D,GAAG,CAAC,GAAG,CAAC,uBAAuB,EAAE,IAAI,EAAE,IAAI,CAAC,CAAC;IAC/C,CAAC;CAGF;AARD,0DAQC"}
