@@ -15,12 +15,13 @@ import { MonitorAgent } from 'pinus-admin';
 import { ServerInfo } from '../util/constants';
 import * as path from 'path';
 import * as os from 'os';
+import { ConnectorComponent } from '../components/connector';
 
 let logger = getLogger('pinus', path.basename(__filename));
 
 
 export interface ConsoleModuleOptions {
-    app?: Application;
+    app: Application;
 
 }
 
@@ -30,7 +31,7 @@ export class ConsoleModule implements IModule {
     static moduleId = '__console__';
 
     constructor(opts: ConsoleModuleOptions) {
-        opts = opts || {};
+        opts = opts ?? {} as any;
         this.app = opts.app;
     }
 
@@ -79,7 +80,7 @@ export class ConsoleModule implements IModule {
                 break;
             case 'blacklist':
                 if (this.app.isFrontend()) {
-                    let connector = this.app.components.__connector__;
+                    let connector = this.app.components.__connector__ as ConnectorComponent;
                     connector.blacklist = connector.blacklist.concat(msg.blacklist);
                 }
                 break;

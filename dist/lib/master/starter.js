@@ -118,7 +118,7 @@ function bindCpu(sid, pid, host) {
         }
         else {
             let cmd = util.format('taskset -pc "%s" "%s"', cpus[sid], pid);
-            sshrun(cmd, host, null);
+            sshrun(cmd, host);
         }
     }
 }
@@ -229,7 +229,7 @@ let spawnProcess = function (command, host, options, cb) {
             logger.warn('child process exit with error, error code: %s, executed command: %s', code, command);
         }
         if (typeof cb === 'function') {
-            cb(code === 0 ? null : code);
+            cb(code);
         }
     });
 };

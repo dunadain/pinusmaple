@@ -35,11 +35,11 @@ export interface ChannelServiceOptions {
 export class ChannelService implements IComponent {
     app: Application;
     channels: { [key: string]: Channel };
-    prefix: string;
-    store: IStore;
+    prefix: string | undefined;
+    store: IStore | undefined;
     broadcastFilter: any;
     channelRemote: ChannelRemote;
-    name: string;
+    name = '';
 
     constructor(app: Application, opts ?: ChannelServiceOptions) {
         opts = opts || {};
@@ -133,7 +133,7 @@ export class ChannelService implements IComponent {
         }
 
         if (!uids || uids.length === 0) {
-            utils.invokeCallback(cb, new Error('uids should not be empty'));
+            if (cb) utils.invokeCallback(cb, new Error('uids should not be empty'));
             return;
         }
         let groups = {}, record;
@@ -141,8 +141,7 @@ export class ChannelService implements IComponent {
             record = uids[i];
             add(record.uid, record.sid, groups);
         }
-
-        sendMessageByGroup(this, route, msg, groups, opts, cb);
+        if (cb) sendMessageByGroup(this, route, msg, groups, opts, cb);
     }
 
     /**
@@ -168,7 +167,7 @@ export class ChannelService implements IComponent {
 
         if (!servers || servers.length === 0) {
             // server list is empty
-            utils.invokeCallback(cb);
+            if (cb) utils.invokeCallback(cb);
             return;
         }
         if (!cb && typeof opts === 'function') {
@@ -180,14 +179,14 @@ export class ChannelService implements IComponent {
 
         let latch = countDownLatch.createCountDownLatch(count, function () {
             if (!successFlag) {
-                utils.invokeCallback(cb, new Error('broadcast fails'));
+                if (cb) utils.invokeCallback(cb, new Error('broadcast fails'));
                 return;
             }
-            utils.invokeCallback(cb, null);
+            if (cb) utils.invokeCallback(cb, null);
         });
 
         let genCB = function (serverId ?: string) {
-            return function (err: Error) {
+            return function (err: Error | null) {
                 if (err) {
                     logger.error('[broadcast] fail to push message to serverId: ' + serverId + ', err:' + err.stack);
                     latch.done();
@@ -213,10 +212,12 @@ export class ChannelService implements IComponent {
                 if (serverId === app.serverId) {
                     (self.channelRemote as any)[method](route, msg, opts).then(() => genCB(serverId)(null)).catch((err: any) => genCB(serverId)(err));
                 } else {
-                    app.rpcInvoke(serverId, {
-                        namespace: namespace, service: service,
-                        method: method, args: [route, msg, opts]
-                    }, genCB(serverId));
+                    if (typeof app.rpcInvoke === 'function') {
+                        app.rpcInvoke(serverId, {
+                            namespace: namespace, service: service,
+                            method: method, args: [route, msg, opts]
+                        }, genCB(serverId));
+                    }
                 }
             }());
         };
@@ -366,7 +367,7 @@ export class Channel {
      */
     pushMessage(route: string, msg: any, opts ?: any, cb ?: (err: Error | null, result ?: void) => void) {
         if (this.state !== ST_INITED) {
-            utils.invokeCallback(cb, new Error('channel is not running now'));
+            if (cb) utils.invokeCallback(cb, new Error('channel is not running now'));
             return;
         }
 
@@ -382,7 +383,7 @@ export class Channel {
             opts = {};
         }
 
-        sendMessageByGroup(this.__channelService__, route, msg, this.groups, opts, cb);
+        if (cb) sendMessageByGroup(this.__channelService__, route, msg, this.groups, opts, cb);
     }
 
     apushMessage: (route: string, msg: any, opts ?: any) => Promise<void> = utils.promisify(this.pushMessage);
@@ -465,7 +466,7 @@ let sendMessageByGroup = function (channelService: ChannelService, route: string
     });
 
     let rpcCB = function (serverId: string) {
-        return function (err: Error, fails: SID[]) {
+        return function (err: Error | null, fails: SID[] | null) {
             if (err) {
                 logger.error('[pushMessage] fail to dispatch msg to serverId: ' + serverId + ', err:' + err.stack);
                 latch.done();
@@ -492,10 +493,12 @@ let sendMessageByGroup = function (channelService: ChannelService, route: string
                     rpcCB(sid)(err, null);
                 });
             } else {
-                app.rpcInvoke(sid, {
-                    namespace: namespace, service: service,
-                    method: method, args: [route, msg, groups[sid], opts]
-                }, rpcCB(sid));
+                if (app.rpcInvoke) {
+                    app.rpcInvoke(sid, {
+                        namespace: namespace, service: service,
+                        method: method, args: [route, msg, groups[sid], opts]
+                    }, rpcCB(sid));
+                }
             }
         })();
     };

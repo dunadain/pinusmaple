@@ -12,14 +12,14 @@ let logger = getLogger('pinus', path.basename(__filename));
 export class RestartNotifyModule implements IModule {
     app: Application;
     service: any;
-    id: string;
+    id = '';
 
     static moduleId = 'RestartNotifyModule';
     private readonly removedServers: { [key: string]: boolean } = {};
 
     private _addEvent = this.onAddServers.bind(this);
     private _removeEvent = this.onRemoveServers.bind(this);
-    private _masterWatcherModule: MasterWatcherModule;
+    private _masterWatcherModule: MasterWatcherModule | undefined;
 
     constructor(opts: { app: Application }, consoleService: ConsoleService) {
         this.app = opts.app;
@@ -40,8 +40,10 @@ export class RestartNotifyModule implements IModule {
     private onRemoveServers(ids: string[]) {
         if (ids && ids.length) {
             // 避免有重复通知的问题。
-            this._masterWatcherModule.watchdog.isStarted = true;
-            this._masterWatcherModule.watchdog.count = -1;
+            if (this._masterWatcherModule) {
+                this._masterWatcherModule.watchdog.isStarted = true;
+                this._masterWatcherModule.watchdog.count = -1;
+            }
             ids.forEach(val => this.onServerLeave(val));
         }
 

@@ -21,21 +21,21 @@ class HybridConnector extends events_1.EventEmitter {
         super();
         this.decode = coder.decode;
         this.encode = coder.encode;
-        this.opts = opts || {};
+        this.opts = opts !== null && opts !== void 0 ? opts : {};
         if (this.opts.realPortKey) {
-            this.opts.realPortKey = opts.realPortKey.toLowerCase();
+            this.opts.realPortKey = this.opts.realPortKey.toLowerCase();
         }
         if (this.opts.realIPKey) {
-            this.opts.realIPKey = opts.realIPKey.toLowerCase();
+            this.opts.realIPKey = this.opts.realIPKey.toLowerCase();
         }
         this.port = port;
         this.host = host;
-        this.useDict = opts.useDict;
-        this.useProtobuf = opts.useProtobuf;
-        this.handshake = new handshake_1.HandshakeCommand(opts);
-        this.heartbeat = new heartbeat_1.HeartbeatCommand(opts);
-        this.distinctHost = opts.distinctHost;
-        this.ssl = opts.ssl;
+        this.useDict = this.opts && !!this.opts.useDict;
+        this.useProtobuf = !!this.opts.useProtobuf;
+        this.handshake = new handshake_1.HandshakeCommand(this.opts);
+        this.heartbeat = new heartbeat_1.HeartbeatCommand(this.opts);
+        this.distinctHost = !!this.opts.distinctHost;
+        this.ssl = this.opts.ssl;
         this.switcher = null;
     }
     /**
@@ -79,7 +79,8 @@ class HybridConnector extends events_1.EventEmitter {
         }
     }
     async stop(force) {
-        this.switcher.close();
+        var _a;
+        (_a = this.switcher) === null || _a === void 0 ? void 0 : _a.close();
         this.listeningServer.close();
     }
 }

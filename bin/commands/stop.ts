@@ -18,7 +18,7 @@ export default function (program: Command) {
     .option('-h, --host <master-host>', 'master server host', DEFAULT_MASTER_HOST)
     .option('-P, --port <master-port>', 'master server port', (value)=>parseInt(value), DEFAULT_MASTER_PORT)
     .action(function () {
-        let args = [].slice.call(arguments, 0);
+        let args = Array.from(arguments);
         let opts = args[args.length - 1];
         opts.serverIds = args.slice(0, -1);
         terminal('stop', opts);

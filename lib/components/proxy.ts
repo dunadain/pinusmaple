@@ -5,7 +5,7 @@
 import * as crc from 'crc';
 import * as utils from '../util/utils';
 import { default as events } from '../util/events';
-import { RpcClient, createClient } from 'pinus-rpc';
+import { RpcClient, RpcMsg, createClient } from 'pinus-rpc';
 import * as pathUtil from '../util/pathUtil';
 import * as Constants from '../util/constants';
 import { getLogger } from 'pinus-logger';
@@ -46,7 +46,7 @@ export class ProxyComponent implements IComponent {
         // cacheMsg is deprecated, just for compatibility here.
         opts.bufferMsg = opts.bufferMsg || opts.cacheMsg || false;
         opts.interval = opts.interval || 30;
-        opts.router = genRouteFun();
+        opts.router = genRouteFun() as any;
         opts.context = opts.context ?? app;
         opts.routeContext = opts.routeContext ?? app;
         if (app.enabled('rpcDebugLog')) {
@@ -174,17 +174,18 @@ export class ProxyComponent implements IComponent {
      * @param {Object}   msg      rpc message: {serverType: serverType, service: serviceName, method: methodName, args: arguments}
      * @param {Function} cb      callback function
      */
-    rpcInvoke(serverId: string, msg: any, cb: (err: Error, ...args: any[]) => void) {
+    rpcInvoke(serverId: string, msg: any, cb: (err: Error | null, ...args: any[]) => void) {
         this.client.rpcInvoke(serverId, msg, cb);
     }
 }
 
 export function manualReloadProxies(app: Application) {
-    if (!app.components.__proxy__) {
+    const proxy = app.components.__proxy__ as ProxyComponent;
+    if (!proxy) {
         return;
     }
-    if (app.components.__proxy__.manualReloadProxies) {
-        app.components.__proxy__.manualReloadProxies();
+    if (proxy.manualReloadProxies) {
+        proxy.manualReloadProxies();
     } else {
         logger.warn('manualReloadProxies not method');
     }
@@ -219,7 +220,8 @@ let genProxies = function (client: RpcClient, app: Application, sinfos: ServerIn
     let item;
     for (let i = 0, l = sinfos.length; i < l; i++) {
         item = sinfos[i];
-        client.addProxies(getProxyRecords(app, item));
+        const proxy = getProxyRecords(app, item);
+        if (proxy) client.addProxies(proxy);
     }
 };
 
@@ -248,7 +250,7 @@ let getProxyRecords = function (app: Application, sinfo: ServerInfo) {
 };
 
 let genRouteFun = function () {
-    return function (session: Session, msg: any, app: Application, cb: RouteCallback) {
+    return function (session: Session, msg: RpcMsg, app: Application, cb: RouteCallback) {
         let routes = app.get(Constants.KEYWORDS.ROUTE);
 
         if (!routes) {
@@ -257,7 +259,7 @@ let genRouteFun = function () {
         }
 
         let type = msg.serverType,
-            route = routes[type] || routes['default'];
+            route = type ? (routes[type] || routes['default']) : null;
 
         if (route) {
             route(session, msg, app, cb);
@@ -267,7 +269,7 @@ let genRouteFun = function () {
     };
 };
 
-export type RouteCallback = (err: Error, routeToServerId ?: string) => void;
+export type RouteCallback = (err: Error | null, routeToServerId ?: string) => void;
 
 let defaultRoute = function (session: Session, msg: any, app: Application, cb: RouteCallback) {
     let list = app.getServersByType(msg.serverType);

@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MultiPushScheduler = void 0;
-const util_1 = require("util");
 const pinus_logger_1 = require("pinus-logger");
 const path = require("path");
 let logger = (0, pinus_logger_1.getLogger)('pinus', path.basename(__filename));
@@ -19,7 +18,7 @@ class MultiPushScheduler {
                     this.scheduler[sch.id] = sch.scheduler;
                 }
             }
-            if (!(0, util_1.isFunction)(opts.selector)) {
+            if (!(typeof opts.selector === 'function')) {
                 throw new Error('MultiPushScheduler必须提供selector参数');
             }
             this.selector = opts.selector;

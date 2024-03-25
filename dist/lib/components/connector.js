@@ -27,9 +27,9 @@ class ConnectorComponent {
         this.connector = getConnector(app, opts);
         this.encode = opts.encode;
         this.decode = opts.decode;
-        this.useCrypto = opts.useCrypto;
-        this.useHostFilter = opts.useHostFilter;
-        this.useAsyncCoder = opts.useAsyncCoder;
+        this.useCrypto = !!opts.useCrypto;
+        this.useHostFilter = !!opts.useHostFilter;
+        this.useAsyncCoder = !!opts.useAsyncCoder;
         this.blacklistFun = opts.blacklistFun;
         this.forwardMsg = opts.forwardMsg;
         if (opts.useDict) {
@@ -55,8 +55,10 @@ class ConnectorComponent {
         }
     }
     async afterStart() {
-        await this.connector.start();
-        this.connector.on('connection', this.hostFilter.bind(this, this.bindEvents.bind(this)));
+        var _a, _b;
+        await ((_a = this.connector) === null || _a === void 0 ? void 0 : _a.start());
+        const handler = this.hostFilter.bind(this, this.bindEvents.bind(this));
+        (_b = this.connector) === null || _b === void 0 ? void 0 : _b.on('connection', handler);
     }
     async stop(force) {
         if (this.connector) {
@@ -65,6 +67,7 @@ class ConnectorComponent {
         }
     }
     send(reqId, route, msg, recvs, opts, cb) {
+        var _a;
         logger.debug('[%s] send message reqId: %s, route: %s, msg: %j, receivers: %j, opts: %j', this.app.serverId, reqId, route, msg, recvs, opts);
         // if (this.useAsyncCoder) {
         //     return this.sendAsync(reqId, route, msg, recvs, opts, cb);
@@ -74,7 +77,7 @@ class ConnectorComponent {
             // use costumized encode
             emsg = this.encode.call(this, reqId, route, msg);
         }
-        else if (this.connector.encode) {
+        else if ((_a = this.connector) === null || _a === void 0 ? void 0 : _a.encode) {
             // use connector default encode
             emsg = this.connector.encode(reqId, route, msg);
         }
@@ -132,9 +135,10 @@ class ConnectorComponent {
     }
     hostFilter(cb, socket) {
         if (!this.useHostFilter) {
-            return cb(socket);
+            cb(socket);
+            return;
         }
-        let ip = socket.remoteAddress.ip;
+        let ip = socket.remoteAddress ? socket.remoteAddress.ip : '';
         let check = function (list) {
             for (let address in list) {
                 let exp = new RegExp(list[address]);
@@ -196,7 +200,7 @@ class ConnectorComponent {
                 return;
             }
             closed = true;
-            if (this.connection) {
+            if (this.connection && session) {
                 this.connection.decreaseConnectionCount(session.uid);
             }
         });
@@ -205,12 +209,13 @@ class ConnectorComponent {
                 return;
             }
             closed = true;
-            if (this.connection) {
+            if (this.connection && session) {
                 this.connection.decreaseConnectionCount(session.uid);
             }
         });
         // new message
         socket.on('message', (msg) => {
+            var _a;
             let dmsg = msg;
             // if (this.useAsyncCoder) {
             //     return this.handleMessageAsync(msg, session, socket);
@@ -218,7 +223,7 @@ class ConnectorComponent {
             if (this.decode) {
                 dmsg = this.decode(msg);
             }
-            else if (this.connector.decode) {
+            else if ((_a = this.connector) === null || _a === void 0 ? void 0 : _a.decode) {
                 dmsg = this.connector.decode(msg);
                 // Perhaps protobuf decoder error can be captured here.
                 // if (dmsg && dmsg.body === null) {
@@ -232,14 +237,15 @@ class ConnectorComponent {
                 return;
             }
             // use rsa crypto
-            if (this.useCrypto) {
+            if (this.useCrypto && session) {
                 let verified = this.verifyMessage(session, dmsg);
                 if (!verified) {
                     logger.error('fail to verify the data received from client.');
                     return;
                 }
             }
-            this.handleMessage(session, dmsg);
+            if (session)
+                this.handleMessage(session, dmsg);
         }); // on message end
     }
     handleMessageAsync(msg, session, socket) {
@@ -291,6 +297,8 @@ class ConnectorComponent {
      */
     getSession(socket) {
         let app = this.app, sid = socket.id;
+        if (!sid || !this.session)
+            return null;
         let session = this.session.get(sid);
         if (session) {
             return session;
@@ -302,13 +310,14 @@ class ConnectorComponent {
         socket.on('error', session.closed.bind(session));
         session.on('closed', this.onSessionClose.bind(this, app));
         session.on('bind', (uid) => {
+            var _a, _b;
             logger.debug('session on [%s] bind with uid: %s', this.app.serverId, uid);
             // update connection statistics if necessary
             if (this.connection) {
                 this.connection.addLoginedUser(uid, {
                     loginTime: Date.now(),
                     uid: uid,
-                    address: socket.remoteAddress.ip + ':' + socket.remoteAddress.port
+                    address: ((_a = socket.remoteAddress) === null || _a === void 0 ? void 0 : _a.ip) + ':' + ((_b = socket.remoteAddress) === null || _b === void 0 ? void 0 : _b.port)
                 });
             }
             this.app.event.emit(events_1.default.BIND_SESSION, session);
@@ -326,6 +335,7 @@ class ConnectorComponent {
         app.event.emit(events_1.default.CLOSE_SESSION, session);
     }
     handleMessage(session, msg) {
+        var _a, _b;
         // logger.debug('[%s] handleMessage session id: %s, msg: %j', this.app.serverId, session.id, msg);
         let type = this.checkServerType(msg.route);
         if (!type) {
@@ -336,10 +346,10 @@ class ConnectorComponent {
         if (this.forwardMsg === false && type !== this.app.getServerType()) {
             logger.warn('illegal route. forwardMsg=false route=', msg.route, 'sessionid=', session.id);
             // kick client requests for illegal route request.
-            this.session.kickBySessionId(session.id);
+            (_a = this.session) === null || _a === void 0 ? void 0 : _a.kickBySessionId(session.id);
             return;
         }
-        this.server.globalHandle(msg, session.toFrontendSession(), (err, resp) => {
+        (_b = this.server) === null || _b === void 0 ? void 0 : _b.globalHandle(msg, session.toFrontendSession(), (err, resp) => {
             if (resp && !msg.id) {
                 logger.warn('try to response to a notify: %j', msg.route);
                 return;

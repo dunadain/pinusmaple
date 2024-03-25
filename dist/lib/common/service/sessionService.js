@@ -23,14 +23,14 @@ let ST_CLOSED = 1;
  */
 class SessionService {
     constructor(opts) {
-        this.akick = utils.promisify(this.kick.bind(this));
-        this.akickBySessionId = utils.promisify(this.kickBySessionId.bind(this));
-        this.abind = utils.promisify(this.bind.bind(this));
-        this.aunbind = utils.promisify(this.unbind.bind(this));
+        // akick: (uid: UID, reason?: string) => Promise<void> = utils.promisify(this.kick.bind(this));
+        // akickBySessionId: (sid: SID, reason?: string) => Promise<void> = utils.promisify(this.kickBySessionId.bind(this));
+        // abind: (sid: SID, uid: UID) => Promise<void> = utils.promisify(this.bind.bind(this));
+        // aunbind: (sid: SID, uid: UID) => Promise<void> = utils.promisify(this.unbind.bind(this));
         this.aimport = utils.promisify(this.import.bind(this));
         this.aimportAll = utils.promisify(this.importAll.bind(this));
         opts = opts || {};
-        this.singleSession = opts.singleSession;
+        this.singleSession = !!opts.singleSession;
         this.sessions = {}; // sid -> session
         this.uidMap = {}; // uid -> sessions
     }
@@ -347,7 +347,7 @@ class Session extends events_1.EventEmitter {
         super();
         this.id = sid; // r
         this.frontendId = frontendId; // r
-        this.uid = null; // r
+        this.uid = ''; // r
         this.settings = {};
         // private
         this.__socket__ = socket;
@@ -377,7 +377,7 @@ class Session extends events_1.EventEmitter {
      * @api private
      */
     unbind(uid) {
-        this.uid = null;
+        this.uid = '';
         this.emit('unbind', uid);
     }
     set(keyOrValues, value) {
@@ -466,17 +466,22 @@ exports.Session = Session;
 class FrontendSession extends events_1.EventEmitter {
     constructor(session) {
         super();
+        this.id = 0;
+        this.uid = '';
+        this.frontendId = '';
         clone(session, this, FRONTEND_SESSION_FIELDS);
         // deep copy for settings
         this.settings = dclone(session.settings);
         this.__session__ = session;
     }
     bind(uid) {
-        this.__sessionService__.bind(this.id, uid);
+        var _a;
+        (_a = this.__sessionService__) === null || _a === void 0 ? void 0 : _a.bind(this.id, uid);
     }
     unbind(uid) {
-        this.__sessionService__.unbind(this.id, uid);
-        this.uid = null;
+        var _a;
+        (_a = this.__sessionService__) === null || _a === void 0 ? void 0 : _a.unbind(this.id, uid);
+        this.uid = '';
     }
     set(key, value) {
         this.settings[key] = value;
@@ -485,10 +490,12 @@ class FrontendSession extends events_1.EventEmitter {
         return this.settings[key];
     }
     push(key, cb) {
-        this.__sessionService__.import(this.id, key, this.get(key), cb);
+        var _a;
+        (_a = this.__sessionService__) === null || _a === void 0 ? void 0 : _a.import(this.id, key, this.get(key), cb);
     }
     pushAll(cb) {
-        this.__sessionService__.importAll(this.id, this.settings, cb);
+        var _a;
+        (_a = this.__sessionService__) === null || _a === void 0 ? void 0 : _a.importAll(this.id, this.settings, cb);
     }
     on(event, listener) {
         this.__session__.on(event, listener);

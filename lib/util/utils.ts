@@ -207,7 +207,7 @@ export function checkPort(server: ServerInfo, cb: (result: string) => void) {
         invokeCallback(cb, 'leisure');
         return;
     }
-    let port = server.port || server.clientPort;
+    let port = server.port ?? server.clientPort ?? 0;
     let host = server.host;
     let generateCommand = function (host: string, port: number) {
         let cmd;
@@ -233,7 +233,7 @@ export function checkPort(server: ServerInfo, cb: (result: string) => void) {
         } else if (stdout.trim() !== '0') {
             invokeCallback(cb, 'busy');
         } else {
-            port = server.clientPort;
+            port = server.clientPort ?? 0;
             let cmd2 = generateCommand(host, port);
             exec(cmd2, function (err, stdout, stderr) {
                 if (err) {
@@ -254,7 +254,7 @@ export function isLocal(host: string) {
     if (!app) {
         return host === '127.0.0.1' || host === 'localhost' || host === '0.0.0.0' || inLocal(host);
     } else {
-        return host === '127.0.0.1' || host === 'localhost' || host === '0.0.0.0' || inLocal(host) || host === app.master.host;
+        return host === '127.0.0.1' || host === 'localhost' || host === '0.0.0.0' || inLocal(host) || host === app.master!.host;
     }
 }
 

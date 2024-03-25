@@ -26,7 +26,7 @@ export default function (program: Command) {
 function list(opts: any) {
     let id = 'pinus_list_' + Date.now();
     connectToMaster(id, opts, function (client: AdminClient) {
-        client.request(co.moduleId, { signal: 'list' }, function (err: Error, data: any) {
+        client.request(co.moduleId, { signal: 'list' }, function (err, data: any) {
             if (err) {
                 console.error(err);
             }

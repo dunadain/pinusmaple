@@ -29,7 +29,7 @@ export class MQTTConnector extends EventEmitter implements IConnector {
     host: string;
     opts: any;
     adaptor: MqttAdaptor;
-    server: net.Server;
+    server!: net.Server;
     constructor(port: number, host: string, opts ?: MQTTConnectorOptions) {
         super();
         this.port = port;

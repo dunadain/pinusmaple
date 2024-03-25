@@ -40,7 +40,7 @@ export function transaction(name: string, conditions: { [key: string]: Transacti
         method(cb);
         transactionLogger.info('[%s]:[%s] condition is executed.', name, cnames[i]);
         i++;
-    }, function (err: Error) {
+    }, function (err) {
         if (err) {
             process.nextTick(function () {
                 transactionLogger.error('[%s]:[%s] condition is executed with err: %j.', name, cnames[--i], err.stack);
@@ -72,23 +72,23 @@ export function transaction(name: string, conditions: { [key: string]: Transacti
                 // do retry if failed util retry times
                 async.whilst(
                     function () {
-                        return retry > 0 && flag;
+                        return retry! > 0 && flag;
                     },
                     function (callback) {
                         let j = 0;
-                        retry--;
+                        retry!--;
                         async.forEachSeries(dmethods, function (method, cb) {
                             method(cb);
                             transactionLogger.info('[%s]:[%s] handler is executed.', name, dnames[j]);
                             j++;
-                        }, function (err: Error) {
+                        }, function (err) {
                             if (err) {
                                 process.nextTick(function () {
-                                    transactionLogger.error('[%s]:[%s]:[%s] handler is executed with err: %j.', name, dnames[--j], times - retry, err.stack);
+                                    transactionLogger.error('[%s]:[%s]:[%s] handler is executed with err: %j.', name, dnames[--j], times! - retry!, err.stack);
                                     let log = {
                                         name: name,
                                         method: dnames[j],
-                                        retry: times - retry,
+                                        retry: times! - retry!,
                                         time: Date.now(),
                                         type: 'handler',
                                         description: err.stack

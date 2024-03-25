@@ -53,7 +53,7 @@ export function runServers(app: Application) {
  * @param {Object} server
  * @return {Void}
  */
-export function run(app: Application, server: ServerInfo, cb ?: (err?: string | number) => void) {
+export function run(app: Application, server: ServerInfo, cb ?: (err?: string | number | null) => void) {
     env = app.get(Constants.RESERVED.ENV);
     let cmd, key;
     if (utils.isLocal(server.host)) {
@@ -70,7 +70,7 @@ export function run(app: Application, server: ServerInfo, cb ?: (err?: string | 
         options.push(util.format('env=%s', env));
         for (key in server) {
             if (key === Constants.RESERVED.CPU) {
-                cpus[server.id] = server[key];
+                cpus[server.id] = server[key] as number;
             }
             options.push(util.format('%s=%s', key, (server as any)[key]));
         }
@@ -90,7 +90,7 @@ export function run(app: Application, server: ServerInfo, cb ?: (err?: string | 
         cmd += util.format(' "%s" env=%s ', app.get(Constants.RESERVED.MAIN), env);
         for (key in server) {
             if (key === Constants.RESERVED.CPU) {
-                cpus[server.id] = server[key];
+                cpus[server.id] = server[key] as number;
             }
             cmd += util.format(' %s=%s ', key, (server as any)[key]);
         }
@@ -116,7 +116,7 @@ export function bindCpu(sid: string, pid: string, host: string) {
             localrun(Constants.COMMAND.TASKSET, null, options);
         } else {
             let cmd = util.format('taskset -pc "%s" "%s"', cpus[sid], pid);
-            sshrun(cmd, host, null);
+            sshrun(cmd, host);
         }
     }
 }
@@ -162,7 +162,7 @@ export function kill(pids: string[], servers: ServerInfo[]) {
  * @param {Function} cb callback function
  *
  */
-export function sshrun(cmd: string, host: string, cb ?: (err?: string | number) => void) {
+export function sshrun(cmd: string, host: string, cb ?: (err?: string | number | null) => void) {
     let args = [];
     args.push(host);
     // pinus masterha 命令下pinus.app为undefined
@@ -186,7 +186,7 @@ export function sshrun(cmd: string, host: string, cb ?: (err?: string | number) 
  * @param {Callback} callback
  *
  */
-export function localrun(cmd: string, host: string, options: string[], callback ?: (err?: string | number) => void) {
+export function localrun(cmd: string, host: string | null, options: string[], callback ?: (err?: string | number | null) => void) {
     logger.info('Executing ' + cmd + ' ' + options + ' locally');
     spawnProcess(cmd, host, options, callback);
 }
@@ -199,7 +199,7 @@ export function localrun(cmd: string, host: string, options: string[], callback 
  * @param {Callback} callback
  *
  */
-let spawnProcess = function (command: string, host: string, options: string[], cb ?: (result: string | number) => void) {
+let spawnProcess = function (command: string, host: string | null, options: string[], cb ?: (result: string | number | null) => void) {
     let child = null;
 
     if (env === Constants.RESERVED.ENV_DEV) {
@@ -228,7 +228,7 @@ let spawnProcess = function (command: string, host: string, options: string[], c
             logger.warn('child process exit with error, error code: %s, executed command: %s', code, command);
         }
         if (typeof cb === 'function') {
-            cb(code === 0 ? null : code);
+            cb(code);
         }
     });
 };

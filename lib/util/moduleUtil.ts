@@ -16,7 +16,7 @@ let logger = getLogger('pinus', path.basename(__filename));
 
 
 export interface ModuleRecord {
-    module: IModuleFactory | IModule;
+    module: IModuleFactory | IModule | undefined;
     moduleId: string;
     opts: any;
 }
@@ -45,15 +45,17 @@ export function loadModules(self: {app: Application , modules: Array<IModule>}, 
             module = record.module;
         }
 
-        moduleId = record.moduleId || module.moduleId;
+        moduleId = record.moduleId || module?.moduleId;
 
         if (!moduleId) {
             logger.warn('ignore an unknown module.');
             continue;
         }
 
-        consoleService.register(moduleId, module);
-        self.modules.push(module);
+        if (module) {
+            consoleService.register(moduleId, module);
+            self.modules.push(module);
+        }
     }
 }
 
@@ -63,7 +65,7 @@ export function startModules(modules: IModule[], cb: (err?: Error) => void) {
     if (!modules) {
         return;
     }
-    startModule(null, modules, 0, cb);
+    startModule(undefined, modules, 0, cb);
 }
 
 /**
@@ -93,7 +95,7 @@ export function registerDefaultModules(isMaster: boolean, app: Application, clos
     }
 }
 
-let startModule = function (err: Error, modules: IModule[], index: number, cb: (err?: Error) => void) {
+let startModule = function (err: Error | undefined, modules: IModule[], index: number, cb: (err?: Error) => void) {
     if (err || index >= modules.length) {
         utils.invokeCallback(cb, err);
         return;

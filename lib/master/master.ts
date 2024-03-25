@@ -52,7 +52,7 @@ export class MasterServer {
             if (err) {
                 process.exit(0);
             }
-            moduleUtil.startModules(self.modules, function (err: Error) {
+            moduleUtil.startModules(self.modules, function (err) {
                 if (err) {
                     utils.invokeCallback(cb, err);
                     return;
@@ -81,14 +81,14 @@ export class MasterServer {
             crashLogger.info(util.format('[%s],[%s],[%s],[%s]', type, id, Date.now(), reason || 'disconnect'));
             let count = 0;
             let time = 0;
-            let pingTimer: NodeJS.Timeout = null;
+            let pingTimer: NodeJS.Timeout | null = null;
             let server = self.app.getServerById(id);
             let stopFlags = self.app.get(Constants.RESERVED.STOP_SERVERS) || [];
             let autoRestart: any = server && server[Constants.RESERVED.AUTO_RESTART] || '';
             let restartForce: any = server && server[Constants.RESERVED.RESTART_FORCE] || '';
             if ((autoRestart.toString() === 'true' || restartForce.toString() === 'true') && stopFlags.indexOf(id) < 0) {
                 let handle = function () {
-                    clearTimeout(pingTimer);
+                    if (pingTimer) clearTimeout(pingTimer);
                     utils.checkPort(server, function (status) {
                         if (status === 'error') {
                             utils.invokeCallback(cb, new Error('Check port command executed with error.'));
@@ -102,7 +102,7 @@ export class MasterServer {
                             }
                         }
                         setTimeout(function () {
-                            starter.run(self.app, server, null);
+                            starter.run(self.app, server);
                         }, Constants.TIME.TIME_WAIT_STOP);
                     });
                 };

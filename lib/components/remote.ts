@@ -79,7 +79,7 @@ export class RemoteComponent implements IComponent {
     }
 
     name = '__remote__';
-    remote: Gateway;
+    remote: Gateway | undefined;
 
     /**
      * Remote component lifecycle function
@@ -101,7 +101,7 @@ export class RemoteComponent implements IComponent {
      * @return {Void}
      */
     async stop(force: boolean) {
-        this.remote.stop(force);
+        this.remote?.stop(force);
     }
 
     /**
@@ -155,8 +155,8 @@ export function manualReloadRemoters(app: Application) {
     if (!app.components.__remote__) {
         return
     }
-    const remote = app.components.__remote__.remote;
-    if (remote['manualReloadRemoters']) {
+    const remote = (app.components.__remote__ as RemoteComponent).remote;
+    if (remote && remote['manualReloadRemoters']) {
         remote['manualReloadRemoters']();
     } else {
         console.warn('manualReloadRemoters  no method');

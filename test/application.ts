@@ -86,7 +86,7 @@ describe('application test', function () {
       };
 
       app.init({ base: mockBase });
-      app.components.__monitor__ = { monitor: null, name: 'mockMonitor', start: () => {return Promise.resolve()}, stop: () => {return Promise.resolve()}, reconnect: () => {} };
+      app.components.__monitor__ = { /*monitor: null,*/ name: 'mockMonitor', start: () => {return Promise.resolve()}, stop: () => {return Promise.resolve()}, /*reconnect: () => {}*/ };
       app.load(mockComponent);
       app.start().catch(err => {
         should.not.exist(err);
@@ -107,7 +107,7 @@ describe('application test', function () {
     });
 
     it('should access the component with a name by app.components.name after loaded', function () {
-      let key1 = 'key1', comp1 = new class implements IComponent { name: 'comp1'; content: 'some thing in comp1'; };
+      let key1 = 'key1', comp1 = new class implements IComponent { name!: 'comp1'; content!: 'some thing in comp1'; };
       let comp2 = { name: 'key2', content: 'some thing in comp2' };
       let key3 = 'key3';
       let comp3 = function () {
@@ -126,8 +126,8 @@ describe('application test', function () {
 
     it('should ignore duplicated components', function () {
       let key = 'key';
-      let comp1 = new class implements IComponent { name: 'comp1';  content: 'some thing in comp1'; };
-      let comp2 = new class implements IComponent { name: 'comp2';  content: 'some thing in comp2'; };
+      let comp1 = new class implements IComponent { name!: 'comp1';  content!: 'some thing in comp1'; };
+      let comp2 = new class implements IComponent { name!: 'comp2';  content!: 'some thing in comp2'; };
 
       app.init({ base: mockBase });
       app.load(key, comp1);
@@ -561,7 +561,7 @@ describe('application test', function () {
       let count = 0;
       this.timeout(8888)
       app.init({ base: mockBase });
-      app.components.__monitor__ = { monitor: null, name: 'mockMonitor', start: () => {return Promise.resolve()}, stop: () => {return Promise.resolve()}, reconnect: () => {} };
+      app.components.__monitor__ = { /*monitor: null,*/ name: 'mockMonitor', start: () => {return Promise.resolve()}, stop: () => {return Promise.resolve()}, /*reconnect: () => {}*/ };
       app.beforeStopHook(function () {
         count++;
       });

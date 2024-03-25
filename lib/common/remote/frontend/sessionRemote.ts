@@ -19,19 +19,19 @@ export class SessionRemote {
     }
 
     bind(sid: SID, uid: UID) {
-        return this.app.sessionService.abind(sid, uid);
+        this.app.sessionService?.bind(sid, uid);
     }
 
     unbind(sid: SID, uid: UID) {
-        return this.app.sessionService.aunbind(sid, uid);
+        this.app.sessionService?.unbind(sid, uid);
     }
 
     push(sid: SID, key: string, value: any) {
-        return this.app.sessionService.aimport(sid, key, value);
+        return this.app.sessionService?.aimport(sid, key, value);
     }
 
     pushAll(sid: SID, settings: { [key: string]: any }) {
-        return this.app.sessionService.aimportAll(sid, settings);
+        return this.app.sessionService?.aimportAll(sid, settings);
     }
 
     /**
@@ -41,7 +41,7 @@ export class SessionRemote {
      * @param  {Function} cb(err, sinfo)  callback funtion, sinfo would be null if the session not exist.
      */
     getBackendSessionBySid(sid: SID) {
-        let session = this.app.sessionService.get(sid);
+        let session = this.app.sessionService?.get(sid);
         if (!session) {
             return;
         }
@@ -55,7 +55,7 @@ export class SessionRemote {
      * @param  {Function} cb(err, sinfo)  callback funtion, sinfo would be null if the session does not exist.
      */
     getBackendSessionsByUid(uid: UID) {
-        let sessions = this.app.sessionService.getByUid(uid);
+        let sessions = this.app.sessionService?.getByUid(uid);
         if (!sessions) {
             return;
         }
@@ -75,7 +75,7 @@ export class SessionRemote {
      * @param  {Function} cb  callback function
      */
     kickBySid(sid: SID, reason: string) {
-        this.app.sessionService.akickBySessionId(sid, reason);
+        this.app.sessionService?.kickBySessionId(sid, reason);
     }
 
     /**
@@ -86,6 +86,6 @@ export class SessionRemote {
      * @param  {Function} cb     callback function
      */
     kickByUid(uid: UID, reason: string) {
-        this.app.sessionService.kick(uid, reason);
+        this.app.sessionService?.kick(uid, reason);
     }
 }

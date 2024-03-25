@@ -9,16 +9,13 @@ import { HandshakeCommand } from './commands/handshake';
 import { HeartbeatCommand } from './commands/heartbeat';
 import * as Kick from './commands/kick';
 import * as coder from './common/coder';
-import { ConnectorComponent } from '../components/connector';
 import { DictionaryComponent } from '../components/dictionary';
 import { ProtobufComponent } from '../components/protobuf';
 import { IComponent } from '../interfaces/IComponent';
 import { pinus } from '../pinus';
 import { IConnector } from '../interfaces/IConnector';
-import { TlsOptions } from 'tls';
-import * as WebSocket from 'ws';
-import { TcpSocket } from './hybrid/tcpsocket';
 import { IHybridSocket } from './hybrid/IHybridSocket';
+import { ConnectorComponent } from '../components/connector';
 
 let curId = 1;
 
@@ -43,34 +40,34 @@ export class HybridConnector extends EventEmitter implements IConnector {
     handshake: HandshakeCommand;
     heartbeat: HeartbeatCommand;
     distinctHost: boolean;
-    ssl: tls.TlsOptions;
-    switcher: Switcher;
+    ssl: tls.TlsOptions | undefined;
+    switcher: Switcher | null;
 
-    connector: IConnector;
-    dictionary: DictionaryComponent;
-    protobuf: ProtobufComponent;
-    decodeIO_protobuf: IComponent;
+    connector!: IConnector;
+    dictionary!: DictionaryComponent;
+    protobuf!: ProtobufComponent;
+    decodeIO_protobuf!: IComponent;
 
-    listeningServer: net.Server | tls.Server;
+    listeningServer!: net.Server | tls.Server;
 
     constructor(port: number, host: string, opts?: HybridConnectorOptions) {
         super();
 
-        this.opts = opts || {};
+        this.opts = opts ?? {};
         if (this.opts.realPortKey) {
-            this.opts.realPortKey = opts.realPortKey.toLowerCase();
+            this.opts.realPortKey = this.opts.realPortKey.toLowerCase();
         }
         if (this.opts.realIPKey) {
-            this.opts.realIPKey = opts.realIPKey.toLowerCase();
+            this.opts.realIPKey = this.opts.realIPKey.toLowerCase();
         }
         this.port = port;
         this.host = host;
-        this.useDict = opts.useDict;
-        this.useProtobuf = opts.useProtobuf;
-        this.handshake = new HandshakeCommand(opts);
-        this.heartbeat = new HeartbeatCommand(opts);
-        this.distinctHost = opts.distinctHost;
-        this.ssl = opts.ssl;
+        this.useDict = this.opts && !!this.opts.useDict;
+        this.useProtobuf = !!this.opts.useProtobuf;
+        this.handshake = new HandshakeCommand(this.opts);
+        this.heartbeat = new HeartbeatCommand(this.opts);
+        this.distinctHost = !!this.opts.distinctHost;
+        this.ssl = this.opts.ssl;
 
         this.switcher = null;
     }
@@ -91,9 +88,9 @@ export class HybridConnector extends EventEmitter implements IConnector {
             self.emit('connection', hybridsocket);
         };
 
-        this.connector = app.components.__connector__.connector;
-        this.dictionary = app.components.__dictionary__;
-        this.protobuf = app.components.__protobuf__;
+        this.connector = (app.components.__connector__ as ConnectorComponent).connector!;
+        this.dictionary = app.components.__dictionary__ as DictionaryComponent;
+        this.protobuf = app.components.__protobuf__ as ProtobufComponent;
         this.decodeIO_protobuf = app.components.__decodeIO__protobuf__;
 
         if (!this.ssl) {
@@ -120,7 +117,7 @@ export class HybridConnector extends EventEmitter implements IConnector {
     }
 
     async stop(force: boolean) {
-        this.switcher.close();
+        this.switcher?.close();
         this.listeningServer.close();
     }
     decode = coder.decode;

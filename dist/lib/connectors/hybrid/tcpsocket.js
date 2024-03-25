@@ -146,7 +146,8 @@ class TcpSocket extends stream_1.Stream {
         let dlen = data.length - offset;
         let len = Math.min(blen, dlen);
         let dend = offset + len;
-        data.copy(this.packageBuffer, this.packageOffset, offset, dend);
+        if (this.packageBuffer)
+            data.copy(this.packageBuffer, this.packageOffset, offset, dend);
         this.packageOffset += len;
         if (this.packageOffset === this.packageSize) {
             // if all the package finished

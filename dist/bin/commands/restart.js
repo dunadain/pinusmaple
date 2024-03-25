@@ -20,7 +20,7 @@ exports.default = default_1;
 function restart(opts) {
     let id = 'pinus_restart_' + Date.now();
     let serverIds = [];
-    let type = null;
+    let type = '';
     if (!!opts.id) {
         serverIds.push(opts.id);
     }

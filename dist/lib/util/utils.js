@@ -194,11 +194,12 @@ exports.ping = ping;
  *
  */
 function checkPort(server, cb) {
+    var _a, _b;
     if (!server.port && !server.clientPort) {
         invokeCallback(cb, 'leisure');
         return;
     }
-    let port = server.port || server.clientPort;
+    let port = (_b = (_a = server.port) !== null && _a !== void 0 ? _a : server.clientPort) !== null && _b !== void 0 ? _b : 0;
     let host = server.host;
     let generateCommand = function (host, port) {
         let cmd;
@@ -219,6 +220,7 @@ function checkPort(server, cb) {
     };
     let cmd1 = generateCommand(host, port);
     let child = (0, child_process_1.exec)(cmd1, function (err, stdout, stderr) {
+        var _a;
         if (err) {
             logger.error('command %s execute with error: %j', cmd1, err.stack);
             invokeCallback(cb, 'error');
@@ -227,7 +229,7 @@ function checkPort(server, cb) {
             invokeCallback(cb, 'busy');
         }
         else {
-            port = server.clientPort;
+            port = (_a = server.clientPort) !== null && _a !== void 0 ? _a : 0;
             let cmd2 = generateCommand(host, port);
             (0, child_process_1.exec)(cmd2, function (err, stdout, stderr) {
                 if (err) {

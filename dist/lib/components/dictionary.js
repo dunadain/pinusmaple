@@ -20,8 +20,10 @@ class DictionaryComponent {
     constructor(app, opts) {
         this.dict = {};
         this.abbrs = {};
+        this.userDicPath = '';
         this.version = '';
         this.name = '__dictionary__';
+        this.ignoreAutoRouter = false;
         this.app = app;
         // Set user dictionary
         let p = path.join(app.getBase(), '/config/dictionary');

@@ -29,10 +29,10 @@ export class DictionaryComponent implements IComponent {
     app: Application;
     dict: { [key: string]: number } = {};
     abbrs: { [key: string]: string } = {};
-    userDicPath: string;
+    userDicPath = '';
     version = '';
     name = '__dictionary__';
-    ignoreAutoRouter: boolean;
+    ignoreAutoRouter = false;
 
     constructor(app: Application, opts: DictionaryComponentOptions) {
         this.app = app;

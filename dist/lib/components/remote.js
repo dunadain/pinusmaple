@@ -63,7 +63,8 @@ class RemoteComponent {
      * @return {Void}
      */
     async stop(force) {
-        this.remote.stop(force);
+        var _a;
+        (_a = this.remote) === null || _a === void 0 ? void 0 : _a.stop(force);
     }
     /**
      * Get remote paths from application
@@ -114,7 +115,7 @@ function manualReloadRemoters(app) {
         return;
     }
     const remote = app.components.__remote__.remote;
-    if (remote['manualReloadRemoters']) {
+    if (remote && remote['manualReloadRemoters']) {
         remote['manualReloadRemoters']();
     }
     else {

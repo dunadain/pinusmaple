@@ -23,6 +23,7 @@ let ST_DESTROYED = 1;
  */
 class ChannelService {
     constructor(app, opts) {
+        this.name = '';
         this.apushMessageByUids = utils.promisify(this.pushMessageByUids);
         this.abroadcast = utils.promisify(this.broadcast);
         opts = opts || {};
@@ -93,7 +94,8 @@ class ChannelService {
             opts = {};
         }
         if (!uids || uids.length === 0) {
-            utils.invokeCallback(cb, new Error('uids should not be empty'));
+            if (cb)
+                utils.invokeCallback(cb, new Error('uids should not be empty'));
             return;
         }
         let groups = {}, record;
@@ -101,7 +103,8 @@ class ChannelService {
             record = uids[i];
             add(record.uid, record.sid, groups);
         }
-        sendMessageByGroup(this, route, msg, groups, opts, cb);
+        if (cb)
+            sendMessageByGroup(this, route, msg, groups, opts, cb);
     }
     broadcast(stype, route, msg, opts, cb) {
         let app = this.app;
@@ -111,7 +114,8 @@ class ChannelService {
         let servers = app.getServersByType(stype);
         if (!servers || servers.length === 0) {
             // server list is empty
-            utils.invokeCallback(cb);
+            if (cb)
+                utils.invokeCallback(cb);
             return;
         }
         if (!cb && typeof opts === 'function') {
@@ -122,10 +126,12 @@ class ChannelService {
         let successFlag = false;
         let latch = countDownLatch.createCountDownLatch(count, function () {
             if (!successFlag) {
-                utils.invokeCallback(cb, new Error('broadcast fails'));
+                if (cb)
+                    utils.invokeCallback(cb, new Error('broadcast fails'));
                 return;
             }
-            utils.invokeCallback(cb, null);
+            if (cb)
+                utils.invokeCallback(cb, null);
         });
         let genCB = function (serverId) {
             return function (err) {
@@ -152,10 +158,12 @@ class ChannelService {
                     self.channelRemote[method](route, msg, opts).then(() => genCB(serverId)(null)).catch((err) => genCB(serverId)(err));
                 }
                 else {
-                    app.rpcInvoke(serverId, {
-                        namespace: namespace, service: service,
-                        method: method, args: [route, msg, opts]
-                    }, genCB(serverId));
+                    if (typeof app.rpcInvoke === 'function') {
+                        app.rpcInvoke(serverId, {
+                            namespace: namespace, service: service,
+                            method: method, args: [route, msg, opts]
+                        }, genCB(serverId));
+                    }
                 }
             }());
         };
@@ -289,7 +297,8 @@ class Channel {
      */
     pushMessage(route, msg, opts, cb) {
         if (this.state !== ST_INITED) {
-            utils.invokeCallback(cb, new Error('channel is not running now'));
+            if (cb)
+                utils.invokeCallback(cb, new Error('channel is not running now'));
             return;
         }
         if (typeof route !== 'string') {
@@ -302,7 +311,8 @@ class Channel {
             cb = opts;
             opts = {};
         }
-        sendMessageByGroup(this.__channelService__, route, msg, this.groups, opts, cb);
+        if (cb)
+            sendMessageByGroup(this.__channelService__, route, msg, this.groups, opts, cb);
     }
 }
 exports.Channel = Channel;
@@ -400,10 +410,12 @@ let sendMessageByGroup = function (channelService, route, msg, groups, opts, cb)
                 });
             }
             else {
-                app.rpcInvoke(sid, {
-                    namespace: namespace, service: service,
-                    method: method, args: [route, msg, groups[sid], opts]
-                }, rpcCB(sid));
+                if (app.rpcInvoke) {
+                    app.rpcInvoke(sid, {
+                        namespace: namespace, service: service,
+                        method: method, args: [route, msg, groups[sid], opts]
+                    }, rpcCB(sid));
+                }
             }
         })();
     };

@@ -20,7 +20,7 @@ class HybridSocket extends events_1.EventEmitter {
         this.id = id;
         this.socket = socket;
         if (request && (opts.realIPKey || opts.realPortKey)) {
-            let ip = request['headers'][opts.realIPKey];
+            let ip = opts.realIPKey ? request['headers'][opts.realIPKey] : undefined;
             if (ip) {
                 this.remoteAddress = {
                     ip: ip,

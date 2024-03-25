@@ -45,9 +45,9 @@ exports.publish = publish;
 /* Requires length be a number > 0 */
 let gen_length = function (length) {
     if (typeof length !== 'number')
-        return null;
+        return 0;
     if (length < 0)
-        return null;
+        return 0;
     let len = [];
     let digit = 0;
     do {

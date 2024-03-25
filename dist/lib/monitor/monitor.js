@@ -14,6 +14,7 @@ const path = require("path");
 let logger = (0, pinus_logger_1.getLogger)('pinus', path.basename(__filename));
 class Monitor {
     constructor(app, opts) {
+        var _a, _b;
         this.modules = [];
         opts = opts || {};
         this.app = app;
@@ -23,8 +24,8 @@ class Monitor {
         this.monitorOpts = {
             id: this.serverInfo.id,
             type: this.app.getServerType(),
-            host: this.masterInfo.host,
-            port: this.masterInfo.port,
+            host: (_a = this.masterInfo) === null || _a === void 0 ? void 0 : _a.host,
+            port: (_b = this.masterInfo) === null || _b === void 0 ? void 0 : _b.port,
             info: this.serverInfo,
             env: this.app.get(Constants.RESERVED.ENV),
             authServer: app.get('adminAuthServerMonitor'),

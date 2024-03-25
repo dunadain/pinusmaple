@@ -9,6 +9,7 @@ import { IModule, MonitorCallback, MasterCallback, ModuleType ,  MonitorAgent, M
 import { Application } from '../application';
 import { pinus } from '../pinus';
 import * as path from 'path';
+import { ConnectionComponent } from '../components/connection';
 let logger = getLogger('pinus', path.basename(__filename));
 
 
@@ -36,7 +37,7 @@ export class OnlineUserModule implements IModule {
     * @api public
     */
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {
-        let connectionService = this.app.components.__connection__;
+        let connectionService = this.app.components.__connection__ as ConnectionComponent;
         if (!connectionService) {
             logger.error('not support connection: %j', agent.id);
             return;

@@ -20,8 +20,8 @@ export interface PublishPacket {
 
 export class MqttAdaptor {
     subReqs: {[messageId: number]: SubscribePacket} = {};
-    publishRoute: string;
-    subscribeRoute: string;
+    publishRoute: string | undefined;
+    subscribeRoute: string | undefined;
     constructor(opts ?: MqttAdaptorOptions) {
         opts = opts || {};
         this.publishRoute = opts.publishRoute;

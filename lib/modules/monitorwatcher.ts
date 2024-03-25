@@ -47,9 +47,9 @@ export class MonitorWatcherModule implements IModule {
 
 let subscribeRequest = function (self: MonitorWatcherModule, agent: MonitorAgent, id: string, cb: MonitorCallback) {
     let msg = { action: 'subscribe', id: id };
-    agent.request(Constants.KEYWORDS.MASTER_WATCHER, msg, function (err: Error, servers) {
+    agent.request(Constants.KEYWORDS.MASTER_WATCHER, msg, function (err, servers) {
         if (err) {
-            logger.error('subscribeRequest request to master with error: %j', err.stack);
+            logger.error('subscribeRequest request to master with error: %j', (err as Error).stack);
             utils.invokeCallback(cb, err);
         }
         let res = [];

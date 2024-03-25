@@ -14,7 +14,7 @@ export default function (program: Command) {
         .option('-h, --host <master-host>', 'master server host', DEFAULT_MASTER_HOST)
         .option('-P, --port <master-port>', 'master server port', (value)=>parseInt(value), DEFAULT_MASTER_PORT)
         .action(function () {
-            let args = [].slice.call(arguments, 0);
+            let args = Array.from(arguments);
             let opts = args[args.length - 1];
             opts.args = args.slice(0, -1);
             add(opts);
@@ -30,7 +30,7 @@ export default function (program: Command) {
 function add(opts: any) {
     let id = 'pinus_add_' + Date.now();
     connectToMaster(id, opts, function (client) {
-        client.request(co.moduleId, { signal: 'add', args: opts.args }, function (err: Error) {
+        client.request(co.moduleId, { signal: 'add', args: opts.args }, function (err) {
             if (err) {
                 console.error(err);
             }

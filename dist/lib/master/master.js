@@ -65,7 +65,8 @@ class MasterServer {
             let restartForce = server && server[Constants.RESERVED.RESTART_FORCE] || '';
             if ((autoRestart.toString() === 'true' || restartForce.toString() === 'true') && stopFlags.indexOf(id) < 0) {
                 let handle = function () {
-                    clearTimeout(pingTimer);
+                    if (pingTimer)
+                        clearTimeout(pingTimer);
                     utils.checkPort(server, function (status) {
                         if (status === 'error') {
                             utils.invokeCallback(cb, new Error('Check port command executed with error.'));
@@ -81,7 +82,7 @@ class MasterServer {
                             }
                         }
                         setTimeout(function () {
-                            starter.run(self.app, server, null);
+                            starter.run(self.app, server);
                         }, Constants.TIME.TIME_WAIT_STOP);
                     });
                 };

@@ -93,9 +93,9 @@ export class FilterService {
      * @param {Object} resp response object send to client
      * @param cb {Function} cb(err) callback function to invoke next chain node
      */
-    afterFilter(err: Error, routeRecord: RouteRecord , msg: any, session: FrontendOrBackendSession, resp: any, cb: HandlerCallback) {
+    afterFilter(err: Error | null, routeRecord: RouteRecord | null, msg: any, session: FrontendOrBackendSession, resp: any, cb: HandlerCallback) {
         let index = 0, self = this;
-        function next(err: Error) {
+        function next(err: Error | null) {
             // if done
             if (index >= self.afters.length) {
                 cb(err);

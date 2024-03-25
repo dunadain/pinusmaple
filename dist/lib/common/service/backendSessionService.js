@@ -22,6 +22,7 @@ let EXPORTED_FIELDS = ['id', 'frontendId', 'uid', 'settings'];
  */
 class BackendSessionService {
     constructor(app) {
+        this.name = '';
         this.aget = utils.promisify(this.get.bind(this));
         this.agetByUid = utils.promisify(this.getByUid.bind(this));
         this.akickBySid = utils.promisify(this.kickBySid.bind(this));
@@ -184,7 +185,8 @@ class BackendSessionService {
 }
 exports.BackendSessionService = BackendSessionService;
 let rpcInvoke = function (app, sid, namespace, service, method, args, cb) {
-    app.rpcInvoke(sid, { namespace: namespace, service: service, method: method, args: args }, cb);
+    if (app.rpcInvoke)
+        app.rpcInvoke(sid, { namespace: namespace, service: service, method: method, args: args }, cb);
 };
 /**
  * BackendSession is the proxy for the frontend internal session passed to handlers and
@@ -205,10 +207,14 @@ let rpcInvoke = function (app, sid, namespace, service, method, args, cb) {
  */
 class BackendSession {
     constructor(opts, service) {
+        this.id = 0;
+        this.uid = '';
+        this.frontendId = '';
         for (let f in opts) {
             this[f] = opts[f];
         }
         this.__sessionService__ = service;
+        this.settings = {};
     }
     /**
      * Bind current session with the user id. It would push the uid to frontend
@@ -241,7 +247,7 @@ class BackendSession {
         let self = this;
         this.__sessionService__.unbind(this.frontendId, this.id, uid, function (err) {
             if (!err) {
-                self.uid = null;
+                self.uid = '';
             }
             utils.invokeCallback(cb, err);
         });

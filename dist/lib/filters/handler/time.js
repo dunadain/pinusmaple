@@ -18,7 +18,7 @@ class TimeFilter {
         if (typeof start === 'number') {
             let timeUsed = Date.now() - start;
             let log = {
-                route: routeRecord.route,
+                route: routeRecord === null || routeRecord === void 0 ? void 0 : routeRecord.route,
                 args: msg,
                 time: utils.format(new Date(start)),
                 timeUsed: timeUsed

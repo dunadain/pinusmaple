@@ -34,7 +34,7 @@ export class SerialFilter implements IHandlerFilter {
     /**
      * request serialization after filter
      */
-    after(err: Error, routeRecord: RouteRecord, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
+    after(err: Error | null, routeRecord: RouteRecord | null, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
         let task = (session as any).__serialTask__;
         if (task) {
             if (!task.done() && !err) {

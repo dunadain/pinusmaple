@@ -22,7 +22,7 @@ export interface MonitorOptions {
 export class Monitor {
     app: Application;
     serverInfo: ServerInfo;
-    masterInfo: ServerStartArgs;
+    masterInfo: ServerStartArgs | null;
     modules: IModule[] = [];
     closeWatcher: any;
     monitorConsole: ConsoleService;
@@ -38,8 +38,8 @@ export class Monitor {
         this.monitorOpts = {
             id: this.serverInfo.id,
             type: this.app.getServerType(),
-            host: this.masterInfo.host,
-            port: this.masterInfo.port,
+            host: this.masterInfo?.host,
+            port: this.masterInfo?.port,
             info: this.serverInfo,
             env: this.app.get(Constants.RESERVED.ENV),
             authServer: app.get('adminAuthServerMonitor'), // auth server function

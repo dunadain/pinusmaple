@@ -28,7 +28,7 @@ class HybridSwitcher extends events_1.EventEmitter {
         this.tcpprocessor = new tcpprocessor_1.TCPProcessor(opts.closeMethod);
         this.id = 1;
         this.timeout = (opts.timeout || DEFAULT_TIMEOUT) * 1000;
-        this.setNoDelay = opts.setNoDelay;
+        this.setNoDelay = !!opts.setNoDelay;
         if (!opts.ssl) {
             this.server.on('connection', this.newSocket.bind(this));
         }

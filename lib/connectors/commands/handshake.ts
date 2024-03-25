@@ -1,6 +1,9 @@
 import { pinus } from '../../pinus';
 import { Package } from 'pinus-protocol';
 import { ISocket } from '../../interfaces/ISocket';
+import { DictionaryComponent } from '../../components/dictionary';
+import { ProtobufComponent } from '../../components/protobuf';
+import { ConnectorComponent } from '../../components/connector';
 
 let CODE_OK = 200;
 let CODE_USE_ERROR = 500;
@@ -27,10 +30,10 @@ export interface HandshakeCommandOptions {
  *                      opts.version required client level
  */
 export class HandshakeCommand {
-    userHandshake: HanshakeFunction;
-    heartbeatSec: number;
-    heartbeat: number;
-    checkClient: CheckClientFunction;
+    userHandshake: HanshakeFunction | undefined;
+    heartbeatSec = 0;
+    heartbeat = 0;
+    checkClient: CheckClientFunction | undefined;
     useDict: boolean;
     useProtobuf: boolean;
     useCrypto: boolean;
@@ -46,9 +49,9 @@ export class HandshakeCommand {
 
         this.checkClient = opts.checkClient;
 
-        this.useDict = opts.useDict;
-        this.useProtobuf = opts.useProtobuf;
-        this.useCrypto = opts.useCrypto;
+        this.useDict = !!opts.useDict;
+        this.useProtobuf = !!opts.useProtobuf;
+        this.useCrypto = !!opts.useCrypto;
     }
 
     handle(socket: ISocket, msg: any) {
@@ -69,11 +72,12 @@ export class HandshakeCommand {
         };
 
         if (this.useDict) {
-            let dictVersion = pinus.app.components.__dictionary__.getVersion();
+            const dict = pinus.app.components.__dictionary__ as DictionaryComponent;
+            let dictVersion = dict.getVersion();
             if (!msg.sys.dictVersion || msg.sys.dictVersion !== dictVersion) {
 
                 // may be deprecated in future
-                opts.dict = pinus.app.components.__dictionary__.getDict();
+                opts.dict = dict.getDict();
 
                 // 用不到这个。
             //    opts.routeToCode = pinus.app.components.__dictionary__.getDict();
@@ -84,9 +88,10 @@ export class HandshakeCommand {
         }
 
         if (this.useProtobuf) {
-            let protoVersion = pinus.app.components.__protobuf__.getVersion();
+            const pbc = pinus.app.components.__protobuf__ as ProtobufComponent;
+            let protoVersion = pbc.getVersion();
             if (!msg.sys.protoVersion || msg.sys.protoVersion !== protoVersion) {
-                opts.protos = pinus.app.components.__protobuf__.getProtos();
+                opts.protos = pbc.getProtos();
             }
             opts.useProto = true;
         }
@@ -104,7 +109,7 @@ export class HandshakeCommand {
         }
 
         if (this.useCrypto) {
-            pinus.app.components.__connector__.setPubKey(socket.id, msg.sys.rsa);
+            if (socket.id) (pinus.app.components.__connector__ as ConnectorComponent).setPubKey(socket.id, msg.sys.rsa);
         }
 
         if (typeof this.userHandshake === 'function') {
@@ -141,14 +146,14 @@ let response = function (socket: ISocket, sys: any, resp ?: any) {
     if (resp) {
         res.user = resp;
     }
-    socket.handshakeResponse(Package.encode(Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
+    if (socket.handshakeResponse) socket.handshakeResponse(Package.encode(Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
 };
 
 let processError = function (socket: ISocket, code: number) {
     let res = {
         code: code
     };
-    socket.sendForce(Package.encode(Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
+    if (socket && socket.sendForce) socket.sendForce(Package.encode(Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
     process.nextTick(function () {
         socket.disconnect();
     });

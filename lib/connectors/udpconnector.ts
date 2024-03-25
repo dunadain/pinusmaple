@@ -35,8 +35,8 @@ export class UDPConnector extends EventEmitter implements IConnector {
     clients: { [key: string]: any };
     host: string;
     port: number;
-    tcpServer: net.Server;
-    socket: dgram.Socket;
+    tcpServer!: net.Server;
+    socket!: dgram.Socket;
 
     constructor(port: number, host: string, opts: UDPConnectorOptions) {
         super();

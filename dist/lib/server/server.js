@@ -90,6 +90,7 @@ class Server extends events_2.EventEmitter {
      * @param  {Callback} callback function
      */
     globalHandle(msg, session, cb) {
+        var _a;
         if (this.state !== ST_STARTED) {
             utils.invokeCallback(cb, new Error('server not started'));
             return;
@@ -101,7 +102,7 @@ class Server extends events_2.EventEmitter {
         }
         if (routeRecord.method === 'constructor') {
             logger.warn('attack session:', session, msg);
-            this.app.sessionService.kickBySessionId(session.id, 'attack');
+            (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.kickBySessionId(session.id, 'attack');
             return;
         }
         let self = this;
@@ -112,7 +113,7 @@ class Server extends events_2.EventEmitter {
                 });
                 return;
             }
-            if (self.app.getServerType() !== routeRecord.serverType) {
+            if (self.app.getServerType() !== (routeRecord === null || routeRecord === void 0 ? void 0 : routeRecord.serverType)) {
                 doForward(self.app, msg, session, routeRecord, function (err, resp) {
                     response(true, self, err, routeRecord, msg, session, resp, cb);
                 });
@@ -390,20 +391,22 @@ let doForward = function (app, msg, session, routeRecord, cb) {
     let finished = false;
     // should route to other servers
     try {
-        app.sysrpc[routeRecord.serverType].msgRemote.forwardMessage(
-        // app.sysrpc[routeRecord.serverType].msgRemote.forwardMessage2(
-        session, msg, 
-        // msg.oldRoute || msg.route,
-        // msg.body,
-        // msg.aesPassword,
-        // msg.compressGzip,
-        session.export()).then(function (resp) {
-            finished = true;
-            utils.invokeCallback(cb, null, resp);
-        }).catch(function (err) {
-            logger.error(app.serverId + ' fail to process remote message:' + err.stack);
-            utils.invokeCallback(cb, err);
-        });
+        if (app.sysrpc && routeRecord) {
+            app.sysrpc[routeRecord.serverType].msgRemote.forwardMessage(
+            // app.sysrpc[routeRecord.serverType].msgRemote.forwardMessage2(
+            session, msg, 
+            // msg.oldRoute || msg.route,
+            // msg.body,
+            // msg.aesPassword,
+            // msg.compressGzip,
+            session.export()).then(function (resp) {
+                finished = true;
+                utils.invokeCallback(cb, null, resp);
+            }).catch(function (err) {
+                logger.error(app.serverId + ' fail to process remote message:' + err.stack);
+                utils.invokeCallback(cb, err);
+            });
+        }
     }
     catch (err) {
         if (!finished) {
@@ -416,6 +419,7 @@ let doHandle = function (server, msg, session, routeRecord, cb) {
     msg = msg.body || {};
     let self = server;
     let handle = function (err, resp) {
+        var _a;
         if (err) {
             // error from before filter
             handleError(false, self, err, msg, session, resp, function (err, resp) {
@@ -423,18 +427,21 @@ let doHandle = function (server, msg, session, routeRecord, cb) {
             });
             return;
         }
-        self.handlerService.handle(routeRecord, msg, session, function (err, resp) {
-            if (err) {
-                // error from handler
-                handleError(false, self, err, msg, session, resp, function (err, resp) {
-                    response(false, self, err, routeRecord, msg, session, resp, cb);
-                });
-                return;
-            }
-            response(false, self, err, routeRecord, msg, session, resp, cb);
-        });
+        if (routeRecord) {
+            (_a = self.handlerService) === null || _a === void 0 ? void 0 : _a.handle(routeRecord, msg, session, function (err, resp) {
+                if (err) {
+                    // error from handler
+                    handleError(false, self, err, msg, session, resp, function (err, resp) {
+                        response(false, self, err, routeRecord, msg, session, resp, cb);
+                    });
+                    return;
+                }
+                response(false, self, err, routeRecord, msg, session, resp, cb);
+            });
+        }
     }; // end of handle
-    beforeFilter(false, server, routeRecord, msg, session, handle);
+    if (routeRecord)
+        beforeFilter(false, server, routeRecord, msg, session, handle);
 };
 /**
  * Schedule crons
@@ -456,7 +463,7 @@ let scheduleCrons = function (server, crons) {
         }
         let cron = action.split('.')[0];
         let job = action.split('.')[1];
-        let handler = handlers[cron];
+        let handler = handlers ? handlers[cron] : undefined;
         if (!handler) {
             logger.error('could not find cron: %j', cronInfo);
             continue;

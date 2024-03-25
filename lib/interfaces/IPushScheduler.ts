@@ -8,7 +8,7 @@ export interface BroadcastOptions {
 }
 export interface ScheduleOptions {
     type ?: 'broadcast' | 'response';
-    userOptions ?: BroadcastOptions;
+    userOptions?: BroadcastOptions;
 }
 
 export type IPushSelector = (reqId: number, route: string, msg: any, recvs: number[], opts: any) => number;
@@ -48,5 +48,5 @@ export interface IPushScheduler {
     /**
      * 调度发生时调用
      */
-    schedule(reqId: number, route: string, msg: any, recvs: SID[], opts: ScheduleOptions, cb: (err?: Error) => void): void;
+    schedule(reqId: number, route: string, msg: any, recvs: SID[] | null, opts: ScheduleOptions, cb: (err?: Error) => void): void;
 }

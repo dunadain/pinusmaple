@@ -59,7 +59,8 @@ class SIOConnector extends events_1.EventEmitter {
      * Stop connector
      */
     async stop(force) {
-        this.server.close();
+        var _a;
+        (_a = this.server) === null || _a === void 0 ? void 0 : _a.close();
     }
     encode(reqId, route, msg) {
         if (reqId) {

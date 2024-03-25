@@ -17,7 +17,7 @@ const os = require("os");
 let logger = (0, pinus_logger_1.getLogger)('pinus', path.basename(__filename));
 class ConsoleModule {
     constructor(opts) {
-        opts = opts || {};
+        opts = opts !== null && opts !== void 0 ? opts : {};
         this.app = opts.app;
     }
     monitorHandler(agent, msg, cb) {

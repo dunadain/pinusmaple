@@ -13,13 +13,16 @@ let logger = (0, pinus_logger_1.getLogger)('pinus', path.basename(__filename));
  */
 class HeartbeatCommand {
     constructor(opts) {
+        this.heartbeat = 0;
+        this.timeout = 0;
         this.timeouts = {};
         this.clients = {};
         opts = opts || {};
-        this.disconnectOnTimeout = opts.disconnectOnTimeout;
+        this.disconnectOnTimeout = !!opts.disconnectOnTimeout;
         if (opts.heartbeat) {
             this.heartbeat = opts.heartbeat * 1000; // heartbeat interval
-            this.timeout = opts.timeout * 1000 || this.heartbeat * 2; // max heartbeat message timeout
+            if (opts.timeout)
+                this.timeout = opts.timeout * 1000 || this.heartbeat * 2; // max heartbeat message timeout
             this.disconnectOnTimeout = true;
         }
     }
@@ -29,22 +32,26 @@ class HeartbeatCommand {
             return;
         }
         let self = this;
-        if (!this.clients[socket.id]) {
-            // clear timers when socket disconnect or error
-            this.clients[socket.id] = 1;
-            socket.once('disconnect', this.clearTimers.bind(this, socket.id));
-            socket.once('error', this.clearTimers.bind(this, socket.id));
+        if (socket.id) {
+            if (!this.clients[socket.id]) {
+                // clear timers when socket disconnect or error
+                this.clients[socket.id] = 1;
+                socket.once('disconnect', this.clearTimers.bind(this, socket.id));
+                socket.once('error', this.clearTimers.bind(this, socket.id));
+            }
         }
         // clear timeout timer
-        if (self.disconnectOnTimeout) {
+        if (self.disconnectOnTimeout && socket.id) {
             this.clear(socket.id);
         }
         socket.sendRaw(pinus_protocol_1.Package.encode(pinus_protocol_1.Package.TYPE_HEARTBEAT));
         if (self.disconnectOnTimeout) {
-            self.timeouts[socket.id] = setTimeout(function () {
-                logger.info('client %j heartbeat timeout.', socket.id);
-                socket.disconnect();
-            }, self.timeout);
+            if (socket.id) {
+                self.timeouts[socket.id] = setTimeout(function () {
+                    logger.info('client %j heartbeat timeout.', socket.id);
+                    socket.disconnect();
+                }, self.timeout);
+            }
         }
     }
     clear(id) {

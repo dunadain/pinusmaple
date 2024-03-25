@@ -19,25 +19,16 @@ import * as appManager from './common/manager/appManager';
 import { TransactionCondictionFunction, TransactionHandlerFunction } from './common/manager/appManager';
 import * as fs from 'fs';
 import * as path from 'path';
-import { isFunction } from 'util';
 import { IComponent } from './interfaces/IComponent';
-import { DictionaryComponent } from './components/dictionary';
-import { PushSchedulerComponent } from './components/pushScheduler';
 import { BackendSessionService } from './common/service/backendSessionService';
 import { ChannelService, ChannelServiceOptions } from './common/service/channelService';
-import { SessionComponent } from './components/session';
-import { ServerComponent } from './components/server';
-import { RemoteComponent, RemoteComponentOptions } from './components/remote';
-import { ProxyComponent, ProxyComponentOptions, RouteFunction, RouteMaps } from './components/proxy';
-import { ProtobufComponent, ProtobufComponentOptions } from './components/protobuf';
-import { MonitorComponent } from './components/monitor';
-import { MasterComponent } from './components/master';
-import { ConnectorComponent, ConnectorComponentOptions } from './components/connector';
-import { ConnectionComponent } from './components/connection';
+import { RemoteComponentOptions } from './components/remote';
+import { ProxyComponentOptions, RouteFunction, RouteMaps } from './components/proxy';
+import { ProtobufComponentOptions } from './components/protobuf';
+import { ConnectorComponentOptions } from './components/connector';
 import { SessionService } from './common/service/sessionService';
 import { ObjectType } from './interfaces/define';
 import { IModule, IModuleFactory } from 'pinus-admin';
-import { ChannelComponent } from './components/channel';
 import { BackendSessionComponent } from './components/backendSession';
 import { AfterHandlerFilter, BeforeHandlerFilter, IHandlerFilter } from './interfaces/IHandlerFilter';
 import { MailStationErrorHandler, RpcFilter, RpcMsg } from 'pinus-rpc';
@@ -126,8 +117,8 @@ let STATE_STOPED = 5;  // app has stoped
 export class Application {
 
     loaded: IComponent[] = [];       // loaded component list
-    components: {
-        __backendSession__?: BackendSessionComponent,
+    /**
+     * __backendSession__?: BackendSessionComponent,
         __channel__?: ChannelComponent,
         __connection__?: ConnectionComponent,
         __connector__?: ConnectorComponent,
@@ -140,6 +131,8 @@ export class Application {
         __server__?: ServerComponent,
         __session__?: SessionComponent,
         __pushScheduler__?: PushSchedulerComponent,
+     */
+    components: {
         [key: string]: IComponent
     } = {};   // name -> component map
 
@@ -151,23 +144,23 @@ export class Application {
     event = new EventEmitter();  // event object to sub/pub events
 
     // current server info
-    serverId: string;   // current server id
-    serverType: string; // current server type
-    curServer: ServerInfo;  // current server info
-    startTime: number; // current server start time
+    serverId!: string;   // current server id
+    serverType!: string; // current server type
+    curServer!: ServerInfo;  // current server info
+    startTime!: number; // current server start time
 
     // global server infos
-    master: ServerStartArgs = null;         // master server info
+    master: ServerStartArgs | null = null;         // master server info
     servers: { [id: string]: ServerInfo } = {};          // current global server info maps, id -> info
     serverTypeMaps: { [type: string]: ServerInfo[] } = {};   // current global type maps, type -> [info]
     serverTypes: string[] = [];      // current global server type list
     usedPlugins: IPlugin[] = [];     // current server custom lifecycle callbacks
     clusterSeq: { [serverType: string]: number } = {};       // cluster id seqence
-    state: number;
-    base: string;
+    state!: number;
+    base!: string;
 
-    startId: string;
-    type: string;
+    startId!: string;
+    type!: string;
     stopTimer: any;
 
     /**
@@ -177,7 +170,7 @@ export class Application {
      */
     init(opts ?: ApplicationOptions) {
         opts = opts || {};
-        let base = opts.base || path.dirname(require.main.filename);
+        let base = opts.base || path.dirname(require.main!.filename);
         this.set(Constants.RESERVED.BASE, base);
         this.base = base;
 
@@ -348,14 +341,14 @@ export class Application {
     load<T extends IComponent>(component: T, opts ?: any): T;
     load<T extends IComponent>(name: string, component: T, opts ?: any): T;
 
-    load<T extends IComponent>(name: string | ObjectType<T>, component ?: ObjectType<T> | any | T, opts ?: any): T {
+    load<T extends IComponent>(name: string | ObjectType<T> | null, component ?: ObjectType<T> | any | T, opts ?: any) {
         if (typeof name !== 'string') {
             opts = component;
             component = name;
             name = null;
         }
 
-        if (isFunction(component)) {
+        if (typeof component === 'function') {
             component = new component(this, opts);
         }
 
@@ -366,7 +359,7 @@ export class Application {
         if (name && this.components[name as string]) {
             // ignore duplicat component
             logger.warn('ignore duplicate component: %j', name);
-            return;
+            return null;
         }
 
         this.loaded.push(component);
@@ -401,7 +394,7 @@ export class Application {
         let env = this.get(Constants.RESERVED.ENV);
         let originPath = path.join(this.getBase(), val);
         let presentPath = path.join(this.getBase(), Constants.FILEPATH.CONFIG_DIR, env, path.basename(val));
-        let realPath: string;
+        let realPath: string | undefined = undefined;
         let tmp: string;
         if (self._checkCanRequire(originPath)) {
             realPath = require.resolve(originPath);
@@ -418,10 +411,10 @@ export class Application {
             logger.error('invalid configuration with file path: %s', key);
         }
 
-        if (!!realPath && !!reload) {
+        if (realPath && reload) {
             const watcher = fs.watch(realPath, function (event, filename) {
                 if (event === 'change') {
-                    self.clearRequireCache(require.resolve(realPath));
+                    self.clearRequireCache(require.resolve(realPath!));
                     watcher.close();
                     self.loadConfigBaseApp(key, val, reload);
 
@@ -616,7 +609,7 @@ export class Application {
                 try {
                     await plugin.beforeShutdown(this, cancelShutDownTimer);
                 } catch (e) {
-                    console.error(`throw err when beforeShutdown `, e.stack);
+                    console.error(`throw err when beforeShutdown `, (e as Error).stack);
                 }
             }
         }
@@ -796,20 +789,20 @@ export class Application {
     configure(env: string, fn: ConfigureCallback): Application;
     configure(env: string, type: string, fn: ConfigureCallback): Application;
     configure(env: string | ConfigureCallback, type ?: string | ConfigureCallback, fn ?: ConfigureCallback): Application {
-        let args = [].slice.call(arguments);
-        fn = args.pop();
+        let args = arguments;
+        fn = args[args.length - 1];
         env = type = Constants.RESERVED.ALL;
 
-        if (args.length > 0) {
+        if (args.length > 1) {
             env = args[0];
         }
-        if (args.length > 1) {
+        if (args.length > 2) {
             type = args[1];
         }
 
         if (env === Constants.RESERVED.ALL || contains(this.settings.env, env as string)) {
             if (type === Constants.RESERVED.ALL || contains(this.settings.serverType, type as string)) {
-                fn.call(this);
+                if (fn !== undefined) fn.call(this);
             }
         }
         return this;
@@ -1174,7 +1167,7 @@ export class Application {
         this.event.emit(events.REMOVE_CRONS, crons);
     }
 
-    astart = utils.promisify(this.start);
+    // astart = utils.promisify(this.start);
     aconfigure: AConfigureFunc1 | AConfigureFunc2 | AConfigureFunc3 = utils.promisify(this.configure) as any;
 
     rpc ?: UserRpc;
@@ -1187,7 +1180,7 @@ export class Application {
      * @param {Object}   msg      rpc message: {serverType: serverType, service: serviceName, method: methodName, args: arguments}
      * @param {Function} cb      callback function
      */
-    rpcInvoke ?: (serverId: FRONTENDID, msg: RpcMsg, cb: Function) => void;
+    rpcInvoke ?: (serverId: FRONTENDID, msg: RpcMsg, cb: (err: Error | null, ...args: any[]) => void) => void;
 
 
     /**

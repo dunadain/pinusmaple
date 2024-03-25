@@ -42,7 +42,7 @@ class ChannelRemote {
                 }
             }
             logger.debug('[%s] pushMessage uids: %j, msg: %j, sids: %j', this.app.serverId, uids, msg, sids);
-            connector.send(null, route, msg, sids, opts, function (err) {
+            connector.send(0, route, msg, sids, opts, function (err) {
                 if (err) {
                     return reject(err);
                 }
@@ -63,7 +63,7 @@ class ChannelRemote {
     broadcast(route, msg, opts) {
         return new Promise((resolve, reject) => {
             let connector = this.app.components.__connector__;
-            connector.send(null, route, msg, null, opts, function (err, resp) {
+            connector.send(0, route, msg, null, opts, function (err, resp) {
                 if (err) {
                     return reject(err);
                 }

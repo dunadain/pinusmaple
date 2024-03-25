@@ -13,7 +13,7 @@ export default function (program: Command) {
     .option('-P, --port <master-port>', 'master server port', (value)=>parseInt(value), DEFAULT_MASTER_PORT)
     .option('-f, --force', 'using this option would kill all the node processes')
     .action(function () {
-        let args = [].slice.call(arguments, 0);
+        let args = Array.from(arguments);
         let opts = args[args.length - 1];
         opts.serverIds = args.slice(0, -1);
         terminal('kill', opts);

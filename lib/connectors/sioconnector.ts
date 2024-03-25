@@ -21,7 +21,7 @@ export class SIOConnector extends EventEmitter implements IConnector {
     port: number;
     host: string;
     opts: SIOConnectorOptions;
-    private server: Server;
+    private server: Server | undefined;
 
 
     constructor(port: number, host: string, opts: SIOConnectorOptions) {
@@ -75,7 +75,7 @@ export class SIOConnector extends EventEmitter implements IConnector {
      * Stop connector
      */
     async stop(force: boolean) {
-        this.server.close();
+        this.server?.close();
     }
 
     encode(reqId: number, route: string, msg: any) {

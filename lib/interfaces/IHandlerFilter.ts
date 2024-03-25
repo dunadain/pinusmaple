@@ -4,7 +4,7 @@ import { FrontendOrBackendSession } from '../server/server';
 
 
 export type BeforeHandlerFilterFunction = (routeRecord: RouteRecord , msg: any, session: FrontendOrBackendSession, cb: HandlerCallback) => void;
-export type AfterHandlerFilterFunction = (err: Error, routeRecord: RouteRecord , msg: any, session: FrontendOrBackendSession, resp: any, cb: HandlerCallback) => void;
+export type AfterHandlerFilterFunction = (err: Error | null, routeRecord: RouteRecord | null, msg: any, session: FrontendOrBackendSession, resp: any, cb: HandlerCallback) => void;
 
 export interface IHandlerFilter {
     before ?: BeforeHandlerFilterFunction;

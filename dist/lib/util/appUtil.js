@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.optComponents = exports.stopComps = exports.loadDefaultComponents = exports.startByType = exports.defaultConfiguration = void 0;
+exports.optComponents = exports.stopComps = exports.loadDefaultComponents = exports.defaultConfiguration = void 0;
 const log = require("./log");
 const utils = require("./utils");
 const path = require("path");
 const Constants = require("./constants");
-const starter = require("../master/starter");
 const pinus_logger_1 = require("pinus-logger");
 const pinus_1 = require("../pinus");
 const util_1 = require("util");
@@ -26,25 +25,21 @@ exports.defaultConfiguration = defaultConfiguration;
 /**
  * Start servers by type.
  */
-function startByType(app, cb) {
-    if (!!app.startId) {
-        if (app.startId === Constants.RESERVED.MASTER) {
-            utils.invokeCallback(cb);
-        }
-        else {
-            starter.runServers(app);
-        }
-    }
-    else {
-        if (!!app.type && app.type !== Constants.RESERVED.ALL && app.type !== Constants.RESERVED.MASTER) {
-            starter.runServers(app);
-        }
-        else {
-            utils.invokeCallback(cb);
-        }
-    }
-}
-exports.startByType = startByType;
+// export function startByType(app: Application, cb: (err?: Error) => void) {
+//     if (!!app.startId) {
+//         if (app.startId === Constants.RESERVED.MASTER) {
+//             utils.invokeCallback(cb);
+//         } else {
+//             starter.runServers(app);
+//         }
+//     } else {
+//         if (!!app.type && app.type !== Constants.RESERVED.ALL && app.type !== Constants.RESERVED.MASTER) {
+//             starter.runServers(app);
+//         } else {
+//             utils.invokeCallback(cb);
+//         }
+//     }
+// }
 /**
  * Load default components for application.
  */
@@ -198,8 +193,9 @@ let loadMaster = function (app) {
  * Process server start command
  */
 let processArgs = function (app, args) {
+    var _a;
     let serverType = args.serverType || Constants.RESERVED.MASTER;
-    let serverId = args.id || app.getMaster().id;
+    let serverId = args.id || ((_a = app.getMaster()) === null || _a === void 0 ? void 0 : _a.id);
     let mode = args.mode || Constants.RESERVED.CLUSTER;
     let masterha = args.masterha || 'false';
     let type = args.type || Constants.RESERVED.ALL;

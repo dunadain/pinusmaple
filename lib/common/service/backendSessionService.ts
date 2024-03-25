@@ -25,7 +25,7 @@ let EXPORTED_FIELDS = ['id', 'frontendId', 'uid', 'settings'];
  */
 export class BackendSessionService implements IComponent {
     app: Application;
-    name: string;
+    name = '';
 
     constructor(app: Application) {
         this.app = app;
@@ -211,8 +211,8 @@ export class BackendSessionService implements IComponent {
     apushAll = utils.promisify(this.pushAll.bind(this));
 }
 
-let rpcInvoke = function (app: Application, sid: FRONTENDID, namespace: string, service: string, method: string, args: any, cb: Function) {
-    app.rpcInvoke(sid, { namespace: namespace, service: service, method: method, args: args }, cb);
+let rpcInvoke = function (app: Application, sid: FRONTENDID, namespace: string, service: string, method: string, args: any, cb: any) {
+    if (app.rpcInvoke) app.rpcInvoke(sid, { namespace: namespace, service: service, method: method, args: args }, cb);
 };
 
 
@@ -234,10 +234,10 @@ let rpcInvoke = function (app: Application, sid: FRONTENDID, namespace: string, 
  * @constructor
  */
 export class BackendSession implements ISession {
-    id: number;
-    uid: string;
-    frontendId: string;
-    settings: { [key: string]: any };
+    id = 0;
+    uid = '';
+    frontendId = '';
+    settings: { [key: string]: any; };
     __sessionService__: BackendSessionService;
 
     constructor(opts: any, service: BackendSessionService) {
@@ -245,6 +245,7 @@ export class BackendSession implements ISession {
             (this as any)[f] = opts[f];
         }
         this.__sessionService__ = service;
+        this.settings = {};
     }
 
     /**
@@ -279,7 +280,7 @@ export class BackendSession implements ISession {
         let self = this;
         this.__sessionService__.unbind(this.frontendId, this.id, uid, function (err) {
             if (!err) {
-                self.uid = null;
+                self.uid = '';
             }
             utils.invokeCallback(cb, err);
         });

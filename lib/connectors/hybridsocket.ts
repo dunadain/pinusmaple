@@ -29,7 +29,7 @@ export interface HybridSocketOptions {
 export class HybridSocket extends EventEmitter implements ISocket {
     id: number;
     socket: IHybridSocket;
-    remoteAddress: { ip: string, port: number };
+    remoteAddress: { ip: string, port: number } | undefined;
     state: number;
 
     constructor(id: number, socket: IHybridSocket, request: any, opts: HybridSocketOptions) {
@@ -38,7 +38,7 @@ export class HybridSocket extends EventEmitter implements ISocket {
         this.socket = socket;
 
         if (request && (opts.realIPKey || opts.realPortKey)) {
-            let ip = request['headers'][opts.realIPKey];
+            let ip = opts.realIPKey ? request['headers'][opts.realIPKey] : undefined;
             if (ip) {
                 this.remoteAddress = {
                     ip: ip,
@@ -54,8 +54,8 @@ export class HybridSocket extends EventEmitter implements ISocket {
                 };
             } else {
                 this.remoteAddress = {
-                    ip: (socket as TcpSocket)._socket.remoteAddress,
-                    port: (socket as TcpSocket)._socket.remotePort
+                    ip: (socket as TcpSocket)._socket.remoteAddress!,
+                    port: (socket as TcpSocket)._socket.remotePort!
                 };
             }
         }

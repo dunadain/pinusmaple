@@ -10,16 +10,20 @@ class SessionRemote {
         this.app = app;
     }
     bind(sid, uid) {
-        return this.app.sessionService.abind(sid, uid);
+        var _a;
+        (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.bind(sid, uid);
     }
     unbind(sid, uid) {
-        return this.app.sessionService.aunbind(sid, uid);
+        var _a;
+        (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.unbind(sid, uid);
     }
     push(sid, key, value) {
-        return this.app.sessionService.aimport(sid, key, value);
+        var _a;
+        return (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.aimport(sid, key, value);
     }
     pushAll(sid, settings) {
-        return this.app.sessionService.aimportAll(sid, settings);
+        var _a;
+        return (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.aimportAll(sid, settings);
     }
     /**
      * Get session informations with session id.
@@ -28,7 +32,8 @@ class SessionRemote {
      * @param  {Function} cb(err, sinfo)  callback funtion, sinfo would be null if the session not exist.
      */
     getBackendSessionBySid(sid) {
-        let session = this.app.sessionService.get(sid);
+        var _a;
+        let session = (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.get(sid);
         if (!session) {
             return;
         }
@@ -41,7 +46,8 @@ class SessionRemote {
      * @param  {Function} cb(err, sinfo)  callback funtion, sinfo would be null if the session does not exist.
      */
     getBackendSessionsByUid(uid) {
-        let sessions = this.app.sessionService.getByUid(uid);
+        var _a;
+        let sessions = (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.getByUid(uid);
         if (!sessions) {
             return;
         }
@@ -59,7 +65,8 @@ class SessionRemote {
      * @param  {Function} cb  callback function
      */
     kickBySid(sid, reason) {
-        this.app.sessionService.akickBySessionId(sid, reason);
+        var _a;
+        (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.kickBySessionId(sid, reason);
     }
     /**
      * Kick sessions by user id.
@@ -69,7 +76,8 @@ class SessionRemote {
      * @param  {Function} cb     callback function
      */
     kickByUid(uid, reason) {
-        this.app.sessionService.kick(uid, reason);
+        var _a;
+        (_a = this.app.sessionService) === null || _a === void 0 ? void 0 : _a.kick(uid, reason);
     }
 }
 exports.SessionRemote = SessionRemote;

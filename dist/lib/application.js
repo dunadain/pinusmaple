@@ -18,7 +18,6 @@ const Constants = require("./util/constants");
 const appManager = require("./common/manager/appManager");
 const fs = require("fs");
 const path = require("path");
-const util_1 = require("util");
 const starter = require("./master/starter");
 let logger = (0, pinus_logger_1.getLogger)('pinus', path.basename(__filename));
 /**
@@ -32,6 +31,21 @@ let STATE_STOPED = 5; // app has stoped
 class Application {
     constructor() {
         this.loaded = []; // loaded component list
+        /**
+         * __backendSession__?: BackendSessionComponent,
+            __channel__?: ChannelComponent,
+            __connection__?: ConnectionComponent,
+            __connector__?: ConnectorComponent,
+            __dictionary__?: DictionaryComponent,
+            __master__?: MasterComponent,
+            __monitor__?: MonitorComponent,
+            __protobuf__?: ProtobufComponent,
+            __proxy__?: ProxyComponent,
+            __remote__?: RemoteComponent,
+            __server__?: ServerComponent,
+            __session__?: SessionComponent,
+            __pushScheduler__?: PushSchedulerComponent,
+         */
         this.components = {}; // name -> component map
         this.settings = {}; // collection keep set/get
         this.event = new events_1.EventEmitter(); // event object to sub/pub events
@@ -42,7 +56,7 @@ class Application {
         this.serverTypes = []; // current global server type list
         this.usedPlugins = []; // current server custom lifecycle callbacks
         this.clusterSeq = {}; // cluster id seqence
-        this.astart = utils.promisify(this.start);
+        // astart = utils.promisify(this.start);
         this.aconfigure = utils.promisify(this.configure);
     }
     /**
@@ -201,7 +215,7 @@ class Application {
             component = name;
             name = null;
         }
-        if ((0, util_1.isFunction)(component)) {
+        if (typeof component === 'function') {
             component = new component(this, opts);
         }
         if (!name && typeof component.name === 'string') {
@@ -210,7 +224,7 @@ class Application {
         if (name && this.components[name]) {
             // ignore duplicat component
             logger.warn('ignore duplicate component: %j', name);
-            return;
+            return null;
         }
         this.loaded.push(component);
         if (name) {
@@ -242,7 +256,7 @@ class Application {
         let env = this.get(Constants.RESERVED.ENV);
         let originPath = path.join(this.getBase(), val);
         let presentPath = path.join(this.getBase(), Constants.FILEPATH.CONFIG_DIR, env, path.basename(val));
-        let realPath;
+        let realPath = undefined;
         let tmp;
         if (self._checkCanRequire(originPath)) {
             realPath = require.resolve(originPath);
@@ -260,7 +274,7 @@ class Application {
         else {
             logger.error('invalid configuration with file path: %s', key);
         }
-        if (!!realPath && !!reload) {
+        if (realPath && reload) {
             const watcher = fs.watch(realPath, function (event, filename) {
                 if (event === 'change') {
                     self.clearRequireCache(require.resolve(realPath));
@@ -523,18 +537,19 @@ class Application {
         return this.set(setting, false);
     }
     configure(env, type, fn) {
-        let args = [].slice.call(arguments);
-        fn = args.pop();
+        let args = arguments;
+        fn = args[args.length - 1];
         env = type = Constants.RESERVED.ALL;
-        if (args.length > 0) {
+        if (args.length > 1) {
             env = args[0];
         }
-        if (args.length > 1) {
+        if (args.length > 2) {
             type = args[1];
         }
         if (env === Constants.RESERVED.ALL || contains(this.settings.env, env)) {
             if (type === Constants.RESERVED.ALL || contains(this.settings.serverType, type)) {
-                fn.call(this);
+                if (fn !== undefined)
+                    fn.call(this);
             }
         }
         return this;

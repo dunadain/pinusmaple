@@ -9,6 +9,7 @@ let logger = (0, pinus_logger_1.getLogger)('pinus', path.basename(__filename));
 // 单个进程重启通知 afterStartAll 生命周期事件。
 class RestartNotifyModule {
     constructor(opts, consoleService) {
+        this.id = '';
         this.removedServers = {};
         this._addEvent = this.onAddServers.bind(this);
         this._removeEvent = this.onRemoveServers.bind(this);
@@ -27,8 +28,10 @@ class RestartNotifyModule {
     onRemoveServers(ids) {
         if (ids && ids.length) {
             // 避免有重复通知的问题。
-            this._masterWatcherModule.watchdog.isStarted = true;
-            this._masterWatcherModule.watchdog.count = -1;
+            if (this._masterWatcherModule) {
+                this._masterWatcherModule.watchdog.isStarted = true;
+                this._masterWatcherModule.watchdog.count = -1;
+            }
             ids.forEach(val => this.onServerLeave(val));
         }
     }

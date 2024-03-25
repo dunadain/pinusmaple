@@ -51,7 +51,7 @@ import { ChannelComponent } from './components/channel';
  */
 
 export class Pinus {
-    private _app: Application;
+    private _app!: Application;
     /**
      * Framework version.
      */

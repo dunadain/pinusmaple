@@ -13,7 +13,7 @@ export class BufferPushScheduler {
     app: Application;
     flushInterval: number;
     sessions: { [sid: number]: Session[] } = {};   // sid -> msg queue
-    tid: NodeJS.Timeout = null;
+    tid: NodeJS.Timeout | null = null;
 
     constructor(app: Application, opts?: BufferPushSchedulerOptions) {
 
@@ -36,7 +36,7 @@ export class BufferPushScheduler {
     schedule(reqId: number, route: string, msg: any, recvs: SID[], opts: ScheduleOptions, cb: () => void) {
         opts = opts || {};
         if (opts.type === 'broadcast') {
-            this.doBroadcast( msg, opts.userOptions);
+            this.doBroadcast( msg, opts.userOptions!);
         } else {
             this.doBatchPush( msg, recvs);
         }

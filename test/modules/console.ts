@@ -7,8 +7,8 @@ declare let before: Function, after: Function;
 describe('console module test', function () {
     describe('#monitorHandler', function () {
         it('should execute the corresponding command with different signals', function () {
-            let flag: boolean;
-            let rs: Array<any>;
+            let flag = false;
+            let rs: Array<any> | undefined;
             let opts: any = {
                 app: {
                     components: {
@@ -50,11 +50,11 @@ describe('console module test', function () {
 
             let msg3 = { signal: 'addCron' };
             module.monitorHandler(agent2, msg3, null);
-            rs.length.should.eql(1);
+            if (rs) rs.length.should.eql(1);
 
             let msg4 = { signal: 'removeCron' };
             module.monitorHandler(agent2, msg4, null);
-            rs.length.should.eql(1);
+            if (rs) rs.length.should.eql(1);
 
             let msg5 = { signal: 'blacklist', blacklist: ['127.0.0.1'] };
             module.monitorHandler(agent1, msg5, null);
@@ -151,7 +151,7 @@ describe('console module test', function () {
 
             let agent2 = {
                 request: function (recordId: string, moduleId: string, msg: any, cb: (err?: Error | string, msg?: any) => void) {
-                    cb(null);
+                    cb();
                 },
                 idMap: {
                     'chat-server-1': {
@@ -165,8 +165,8 @@ describe('console module test', function () {
                 should.not.exist(err);
                 should.exist(result.code);
                 result.code.should.eql('remained');
-                global['setTimeout'] = orgtimeout
-                done();
+                global['setTimeout'] = orgtimeout;
+                (done as () => void)();
             });
         });
 
@@ -248,7 +248,7 @@ describe('console module test', function () {
             let msg2 = { signal: 'restart', type: 'chat', ids: <any>[] };
             let agent = {
                 request: function (recordId: string, moduleId: string, msg: any, cb: (err?: Error | string, msg?: any) => void) {
-                    cb(null);
+                    cb();
                 }
             };
             module.clientHandler(agent, msg1, function (err: Error, result: any) {

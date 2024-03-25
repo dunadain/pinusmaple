@@ -11,7 +11,7 @@ function default_1(program) {
         .option('-h, --host <master-host>', 'master server host', constants_1.DEFAULT_MASTER_HOST)
         .option('-P, --port <master-port>', 'master server port', (value) => parseInt(value), constants_1.DEFAULT_MASTER_PORT)
         .action(function () {
-        let args = [].slice.call(arguments, 0);
+        let args = Array.from(arguments);
         let opts = args[args.length - 1];
         opts.args = args.slice(0, -1);
         add(opts);

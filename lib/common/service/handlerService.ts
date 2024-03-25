@@ -9,6 +9,7 @@ import { RouteRecord, ServerInfo } from '../../util/constants';
 import { BackendSession } from './backendSessionService';
 import * as path from 'path';
 import { LoaderPathType } from 'pinus-loader';
+import { ServerComponent } from '../../components/server';
 
 let logger = getLogger('pinus', path.basename(__filename));
 let forwardLogger = getLogger('forward-log', path.basename(__filename));
@@ -19,7 +20,7 @@ export interface HandlerServiceOptions {
     handlersPaths?: string[];
 }
 
-export type HandlerCallback = (err: Error, response ?: any) => void;
+export type HandlerCallback = (err: Error | null, response ?: any) => void;
 export type HandlerMethod = (msg: any, session: FrontendSession | BackendSession) => Promise<any>;
 export type Handler = { [method: string]: HandlerMethod };
 export type Handlers = { [handler: string]: Handler };
@@ -69,7 +70,7 @@ export class HandlerService {
     /**
      * Handler the request.
      */
-    handle(routeRecord: RouteRecord, msg: any, session: FrontendSession | BackendSession, cb: HandlerCallback) {
+    handle(routeRecord: RouteRecord, msg: [string, FrontendSession | BackendSession], session: FrontendSession | BackendSession, cb: HandlerCallback) {
         // the request should be processed by current server
         let handler = this.getHandler(routeRecord);
         if (!handler) {
@@ -158,8 +159,10 @@ export class HandlerService {
             targetPaths = new Set<string>();
             this.handlerPaths[serverInfo.serverType] = targetPaths;
         }
-        for (let path of serverInfo.handlerPaths) {
-            targetPaths.add(path);
+        if (serverInfo.handlerPaths) {
+            for (let path of serverInfo.handlerPaths) {
+                targetPaths.add(path);
+            }
         }
     }
 
@@ -182,8 +185,10 @@ export function manualReloadHandlers(app: Application) {
     if (!p) {
         return;
     }
-    const handlerMap: HandlerMap = app.components.__server__.server.handlerService.handlerMap;
-    handlerMap[app.serverType] = Loader.load(p, app, true, true, LoaderPathType.PINUS_HANDLER);
+    const handlerMap: HandlerMap = (app.components.__server__ as ServerComponent).server.handlerService!.handlerMap;
+    const handler = Loader.load(p, app, true, true, LoaderPathType.PINUS_HANDLER);
+    if (handler)
+        handlerMap[app.serverType] = handler;
 }
 
 let watchHandlers = function (app: Application, handlerMap: HandlerMap) {
@@ -191,7 +196,10 @@ let watchHandlers = function (app: Application, handlerMap: HandlerMap) {
     if (!!p) {
         fs.watch(p, function (event, name) {
             if (event === 'change') {
-                handlerMap[app.serverType] = Loader.load(p, app, true, true, LoaderPathType.PINUS_HANDLER);
+                if (p) {
+                    const handler = Loader.load(p, app, true, true, LoaderPathType.PINUS_HANDLER);
+                    if (handler) handlerMap[app.serverType] = handler;
+                }
             }
         });
     }

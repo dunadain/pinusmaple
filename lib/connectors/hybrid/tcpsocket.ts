@@ -39,14 +39,14 @@ export class TcpSocket extends Stream implements IHybridSocket {
 
     _socket: net.Socket;
     headSize: number;
-    closeMethod: string;
+    closeMethod: string | undefined;
     headBuffer: Buffer;
     headHandler: Function;
 
     headOffset: number;
     packageOffset: number;
     packageSize: number;
-    packageBuffer: Buffer;
+    packageBuffer: Buffer | null;
     state: number;
 
     constructor(socket: net.Socket, opts?: TcpSocketOptions) {
@@ -96,7 +96,7 @@ export class TcpSocket extends Stream implements IHybridSocket {
             try {
                 this._socket.destroy();
             } catch (e) {
-                logger.error('socket close with destroy error: %j', e.stack);
+                logger.error('socket close with destroy error: %j', (e as Error).stack);
             }
         }
     }
@@ -194,7 +194,7 @@ export class TcpSocket extends Stream implements IHybridSocket {
         let len = Math.min(blen, dlen);
         let dend = offset + len;
 
-        data.copy(this.packageBuffer, this.packageOffset, offset, dend);
+        if (this.packageBuffer) data.copy(this.packageBuffer, this.packageOffset, offset, dend);
 
         this.packageOffset += len;
 

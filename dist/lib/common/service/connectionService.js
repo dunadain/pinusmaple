@@ -56,7 +56,7 @@ class ConnectionService {
         if (!!this.logined[uid]) {
             this.loginedCount--;
         }
-        this.logined[uid] = undefined;
+        delete this.logined[uid];
     }
     /**
      * Decrease connection count

@@ -9,6 +9,7 @@ import {UID, SID} from '../../../util/constants';
 import {ScheduleOptions} from '../../../interfaces/IPushScheduler';
 import {Session} from '../../service/sessionService';
 import * as path from 'path';
+import { ConnectorComponent } from '../../../components/connector';
 
 let logger = getLogger('pinus', path.basename(__filename));
 
@@ -40,7 +41,7 @@ export class ChannelRemote {
                 return reject(new Error('can not send empty message.'));
             }
 
-            let connector = this.app.components.__connector__;
+            let connector = this.app.components.__connector__ as ConnectorComponent;
 
             let sessionService = this.app.get('sessionService');
             let fails: UID[] = [], sids: SID[] = [], sessions: Session[], j: number, k: number;
@@ -55,7 +56,7 @@ export class ChannelRemote {
                 }
             }
             logger.debug('[%s] pushMessage uids: %j, msg: %j, sids: %j', this.app.serverId, uids, msg, sids);
-            connector.send(null, route, msg, sids, opts, function (err) {
+            connector.send(0, route, msg, sids, opts, function (err) {
                 if (err) {
                     return reject(err);
                 }
@@ -76,9 +77,9 @@ export class ChannelRemote {
      */
     broadcast(route: string, msg: any, opts: ScheduleOptions) {
         return new Promise<any>((resolve, reject) => {
-            let connector = this.app.components.__connector__;
+            let connector = this.app.components.__connector__ as ConnectorComponent;
 
-            connector.send(null, route, msg, null, opts, function (err, resp) {
+            connector.send(0, route, msg, null, opts, function (err, resp) {
                 if (err) {
                     return reject(err);
                 }

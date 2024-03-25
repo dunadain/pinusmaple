@@ -53,31 +53,31 @@ export interface RsaKey {
 
 export class ConnectorComponent implements IComponent {
     app: Application;
-    connector: IConnector;
+    connector: IConnector | null;
     encode: IEncoder;
     decode: IDecoder;
     useCrypto: boolean;
     useHostFilter: boolean;
     useAsyncCoder: boolean;
     blacklistFun: BlackListFunction;
-    connection: ConnectionService;
+    connection: ConnectionService | undefined;
     forwardMsg?: boolean;
 
     keys: { [id: number]: RsaKey } = {};
     blacklist: string[] = [];
-    server: ServerComponent;
-    session: SessionComponent;
+    server: ServerComponent | null;
+    session: SessionComponent | null;
 
     constructor(app: Application, opts?: ConnectorComponentOptions) {
         opts = opts || {};
         this.app = app;
         this.connector = getConnector(app, opts);
-        this.encode = opts.encode;
-        this.decode = opts.decode;
-        this.useCrypto = opts.useCrypto;
-        this.useHostFilter = opts.useHostFilter;
-        this.useAsyncCoder = opts.useAsyncCoder;
-        this.blacklistFun = opts.blacklistFun;
+        this.encode = opts.encode!;
+        this.decode = opts.decode!;
+        this.useCrypto = !!opts.useCrypto;
+        this.useHostFilter = !!opts.useHostFilter;
+        this.useAsyncCoder = !!opts.useAsyncCoder;
+        this.blacklistFun = opts.blacklistFun!;
         this.forwardMsg = opts.forwardMsg;
 
         if (opts.useDict) {
@@ -96,9 +96,9 @@ export class ConnectorComponent implements IComponent {
     name = '__connector__';
 
     async start() {
-        this.server = this.app.components.__server__;
-        this.session = this.app.components.__session__;
-        this.connection = this.app.components.__connection__;
+        this.server = this.app.components.__server__ as ServerComponent;
+        this.session = this.app.components.__session__ as SessionComponent;
+        this.connection = this.app.components.__connection__ as ConnectionComponent;
 
         // check component dependencies
         if (!this.server) {
@@ -111,8 +111,9 @@ export class ConnectorComponent implements IComponent {
     }
 
     async afterStart() {
-        await this.connector.start();
-        this.connector.on('connection', this.hostFilter.bind(this, this.bindEvents.bind(this)));
+        await this.connector?.start();
+        const handler = this.hostFilter.bind(this, this.bindEvents.bind(this))
+        this.connector?.on('connection', handler as any);
     }
 
     async stop(force: boolean) {
@@ -122,7 +123,7 @@ export class ConnectorComponent implements IComponent {
         }
     }
 
-    send(reqId: number, route: string, msg: any, recvs: SID[], opts: ScheduleOptions, cb: (err?: Error, resp ?: any) => void) {
+    send(reqId: number, route: string, msg: any, recvs: SID[] | null, opts: ScheduleOptions, cb: (err?: Error, resp ?: any) => void) {
         logger.debug('[%s] send message reqId: %s, route: %s, msg: %j, receivers: %j, opts: %j', this.app.serverId, reqId, route, msg, recvs, opts);
         // if (this.useAsyncCoder) {
         //     return this.sendAsync(reqId, route, msg, recvs, opts, cb);
@@ -132,7 +133,7 @@ export class ConnectorComponent implements IComponent {
         if (this.encode) {
             // use costumized encode
             emsg = this.encode.call(this, reqId, route, msg);
-        } else if (this.connector.encode) {
+        } else if (this.connector?.encode) {
             // use connector default encode
             emsg = this.connector.encode(reqId, route, msg);
         }
@@ -140,7 +141,7 @@ export class ConnectorComponent implements IComponent {
         this.doSend(reqId, route, emsg, recvs, opts, cb);
     }
 
-    sendAsync(reqId: number, route: string, msg: any, recvs: SID[], opts: ScheduleOptions, cb: (err?: Error, resp ?: any) => void) {
+    sendAsync(reqId: number, route: string, msg: any, recvs: SID[] | null, opts: ScheduleOptions, cb: (err?: Error, resp ?: any) => void) {
         let emsg = msg;
         let self = this;
 
@@ -175,14 +176,14 @@ export class ConnectorComponent implements IComponent {
         throw new Error('not implement sendAsync');
     }
 
-    doSend(reqId: number, route: string, emsg: any, recvs: SID[], opts: ScheduleOptions, cb: (err?: Error) => void) {
+    doSend(reqId: number, route: string, emsg: any, recvs: SID[] | null, opts: ScheduleOptions, cb: (err?: Error) => void) {
         if (!emsg) {
             process.nextTick(function () {
                 return cb && cb(new Error('fail to send message for encode result is empty.'));
             });
         }
 
-        this.app.components.__pushScheduler__.schedule(reqId, route, emsg,
+        (this.app.components.__pushScheduler__ as PushSchedulerComponent).schedule(reqId, route, emsg,
             recvs, opts, cb);
     }
 
@@ -198,12 +199,13 @@ export class ConnectorComponent implements IComponent {
     }
 
 
-    hostFilter(cb: (socket: ISocket) => boolean, socket: ISocket) {
+    hostFilter(cb: (socket: ISocket) => void, socket: ISocket) {
         if (!this.useHostFilter) {
-            return cb(socket);
+            cb(socket);
+            return;
         }
 
-        let ip = socket.remoteAddress.ip;
+        let ip = socket.remoteAddress ? socket.remoteAddress.ip : '';
         let check = function (list: string[]) {
             for (let address in list) {
                 let exp = new RegExp(list[address]);
@@ -266,7 +268,7 @@ export class ConnectorComponent implements IComponent {
                 return;
             }
             closed = true;
-            if (this.connection) {
+            if (this.connection && session) {
                 this.connection.decreaseConnectionCount(session.uid);
             }
         });
@@ -276,7 +278,7 @@ export class ConnectorComponent implements IComponent {
                 return;
             }
             closed = true;
-            if (this.connection) {
+            if (this.connection && session) {
                 this.connection.decreaseConnectionCount(session.uid);
             }
         });
@@ -290,7 +292,7 @@ export class ConnectorComponent implements IComponent {
 
             if (this.decode) {
                 dmsg = this.decode(msg);
-            } else if (this.connector.decode) {
+            } else if (this.connector?.decode) {
                 dmsg = this.connector.decode(msg);
                 // Perhaps protobuf decoder error can be captured here.
                 // if (dmsg && dmsg.body === null) {
@@ -305,7 +307,7 @@ export class ConnectorComponent implements IComponent {
             }
 
             // use rsa crypto
-            if (this.useCrypto) {
+            if (this.useCrypto && session) {
                 let verified = this.verifyMessage(session, dmsg);
                 if (!verified) {
                     logger.error('fail to verify the data received from client.');
@@ -313,7 +315,7 @@ export class ConnectorComponent implements IComponent {
                 }
             }
 
-            this.handleMessage(session, dmsg);
+            if (session) this.handleMessage(session, dmsg);
         }); // on message end
     }
 
@@ -371,6 +373,7 @@ export class ConnectorComponent implements IComponent {
     getSession(socket: ISocket) {
         let app = this.app,
             sid = socket.id;
+        if (!sid || !this.session) return null;
         let session = this.session.get(sid);
         if (session) {
             return session;
@@ -390,7 +393,7 @@ export class ConnectorComponent implements IComponent {
                 this.connection.addLoginedUser(uid, {
                     loginTime: Date.now(),
                     uid: uid,
-                    address: socket.remoteAddress.ip + ':' + socket.remoteAddress.port
+                    address: socket.remoteAddress?.ip + ':' + socket.remoteAddress?.port
                 });
             }
             this.app.event.emit(events.BIND_SESSION, session);
@@ -422,10 +425,10 @@ export class ConnectorComponent implements IComponent {
         if (this.forwardMsg === false && type !== this.app.getServerType()) {
             logger.warn('illegal route. forwardMsg=false route=', msg.route, 'sessionid=', session.id);
             // kick client requests for illegal route request.
-            this.session.kickBySessionId(session.id);
+            this.session?.kickBySessionId(session.id);
             return;
         }
-        this.server.globalHandle(msg, session.toFrontendSession(), (err, resp) => {
+        this.server?.globalHandle(msg, session.toFrontendSession(), (err, resp) => {
             if (resp && !msg.id) {
                 logger.warn('try to response to a notify: %j', msg.route);
                 return;
@@ -518,5 +521,5 @@ let getConnector = function (app: Application, opts: any) {
 
 let getDefaultConnector = function (app: Application, opts: SIOConnectorOptions) {
     let curServer = app.getCurServer();
-    return new SIOConnector(curServer.clientPort, curServer.host, opts);
+    return new SIOConnector(curServer.clientPort!, curServer.host, opts);
 };

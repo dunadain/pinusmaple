@@ -16,6 +16,8 @@ let CODE_OLD_CLIENT = 501;
  */
 class HandshakeCommand {
     constructor(opts) {
+        this.heartbeatSec = 0;
+        this.heartbeat = 0;
         opts = opts || {};
         this.userHandshake = opts.handshake;
         if (opts.heartbeat) {
@@ -23,9 +25,9 @@ class HandshakeCommand {
             this.heartbeat = opts.heartbeat * 1000;
         }
         this.checkClient = opts.checkClient;
-        this.useDict = opts.useDict;
-        this.useProtobuf = opts.useProtobuf;
-        this.useCrypto = opts.useCrypto;
+        this.useDict = !!opts.useDict;
+        this.useProtobuf = !!opts.useProtobuf;
+        this.useCrypto = !!opts.useCrypto;
     }
     handle(socket, msg) {
         if (!msg.sys) {
@@ -42,10 +44,11 @@ class HandshakeCommand {
             heartbeat: setupHeartbeat(this)
         };
         if (this.useDict) {
-            let dictVersion = pinus_1.pinus.app.components.__dictionary__.getVersion();
+            const dict = pinus_1.pinus.app.components.__dictionary__;
+            let dictVersion = dict.getVersion();
             if (!msg.sys.dictVersion || msg.sys.dictVersion !== dictVersion) {
                 // may be deprecated in future
-                opts.dict = pinus_1.pinus.app.components.__dictionary__.getDict();
+                opts.dict = dict.getDict();
                 // 用不到这个。
                 //    opts.routeToCode = pinus.app.components.__dictionary__.getDict();
                 //     opts.codeToRoute = pinus.app.components.__dictionary__.getAbbrs();
@@ -54,9 +57,10 @@ class HandshakeCommand {
             opts.useDict = true;
         }
         if (this.useProtobuf) {
-            let protoVersion = pinus_1.pinus.app.components.__protobuf__.getVersion();
+            const pbc = pinus_1.pinus.app.components.__protobuf__;
+            let protoVersion = pbc.getVersion();
             if (!msg.sys.protoVersion || msg.sys.protoVersion !== protoVersion) {
-                opts.protos = pinus_1.pinus.app.components.__protobuf__.getProtos();
+                opts.protos = pbc.getProtos();
             }
             opts.useProto = true;
         }
@@ -72,7 +76,8 @@ class HandshakeCommand {
             opts.useProto = true;
         }
         if (this.useCrypto) {
-            pinus_1.pinus.app.components.__connector__.setPubKey(socket.id, msg.sys.rsa);
+            if (socket.id)
+                pinus_1.pinus.app.components.__connector__.setPubKey(socket.id, msg.sys.rsa);
         }
         if (typeof this.userHandshake === 'function') {
             this.userHandshake(msg, function (err, resp) {
@@ -105,13 +110,15 @@ let response = function (socket, sys, resp) {
     if (resp) {
         res.user = resp;
     }
-    socket.handshakeResponse(pinus_protocol_1.Package.encode(pinus_protocol_1.Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
+    if (socket.handshakeResponse)
+        socket.handshakeResponse(pinus_protocol_1.Package.encode(pinus_protocol_1.Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
 };
 let processError = function (socket, code) {
     let res = {
         code: code
     };
-    socket.sendForce(pinus_protocol_1.Package.encode(pinus_protocol_1.Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
+    if (socket && socket.sendForce)
+        socket.sendForce(pinus_protocol_1.Package.encode(pinus_protocol_1.Package.TYPE_HANDSHAKE, Buffer.from(JSON.stringify(res))));
     process.nextTick(function () {
         socket.disconnect();
     });

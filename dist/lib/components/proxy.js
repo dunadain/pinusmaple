@@ -148,11 +148,12 @@ class ProxyComponent {
 }
 exports.ProxyComponent = ProxyComponent;
 function manualReloadProxies(app) {
-    if (!app.components.__proxy__) {
+    const proxy = app.components.__proxy__;
+    if (!proxy) {
         return;
     }
-    if (app.components.__proxy__.manualReloadProxies) {
-        app.components.__proxy__.manualReloadProxies();
+    if (proxy.manualReloadProxies) {
+        proxy.manualReloadProxies();
     }
     else {
         logger.warn('manualReloadProxies not method');
@@ -188,7 +189,9 @@ let genProxies = function (client, app, sinfos) {
     let item;
     for (let i = 0, l = sinfos.length; i < l; i++) {
         item = sinfos[i];
-        client.addProxies(getProxyRecords(app, item));
+        const proxy = getProxyRecords(app, item);
+        if (proxy)
+            client.addProxies(proxy);
     }
 };
 /**
@@ -220,7 +223,7 @@ let genRouteFun = function () {
             defaultRoute(session, msg, app, cb);
             return;
         }
-        let type = msg.serverType, route = routes[type] || routes['default'];
+        let type = msg.serverType, route = type ? (routes[type] || routes['default']) : null;
         if (route) {
             route(session, msg, app, cb);
         }

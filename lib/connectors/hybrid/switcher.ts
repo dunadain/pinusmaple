@@ -58,7 +58,7 @@ export class HybridSwitcher extends EventEmitter implements IHybridSwitcher {
         this.tcpprocessor = new TCPProcessor(opts.closeMethod);
         this.id = 1;
         this.timeout = (opts.timeout || DEFAULT_TIMEOUT) * 1000;
-        this.setNoDelay = opts.setNoDelay;
+        this.setNoDelay = !!opts.setNoDelay;
 
         if (!opts.ssl) {
             this.server.on('connection', this.newSocket.bind(this));

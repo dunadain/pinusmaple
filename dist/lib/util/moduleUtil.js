@@ -37,13 +37,15 @@ function loadModules(self, consoleService) {
         else {
             module = record.module;
         }
-        moduleId = record.moduleId || module.moduleId;
+        moduleId = record.moduleId || (module === null || module === void 0 ? void 0 : module.moduleId);
         if (!moduleId) {
             logger.warn('ignore an unknown module.');
             continue;
         }
-        consoleService.register(moduleId, module);
-        self.modules.push(module);
+        if (module) {
+            consoleService.register(moduleId, module);
+            self.modules.push(module);
+        }
     }
 }
 exports.loadModules = loadModules;
@@ -52,7 +54,7 @@ function startModules(modules, cb) {
     if (!modules) {
         return;
     }
-    startModule(null, modules, 0, cb);
+    startModule(undefined, modules, 0, cb);
 }
 exports.startModules = startModules;
 /**

@@ -22,10 +22,11 @@ class WSProcessor extends events_1.EventEmitter {
         this.state = ST_STARTED;
     }
     add(socket, data) {
+        var _a;
         if (this.state !== ST_STARTED) {
             return;
         }
-        this.httpServer.emit('connection', socket);
+        (_a = this.httpServer) === null || _a === void 0 ? void 0 : _a.emit('connection', socket);
         if (typeof socket.ondata === 'function') {
             // compatible with stream2
             socket.ondata(data, 0, data.length);
@@ -36,11 +37,12 @@ class WSProcessor extends events_1.EventEmitter {
         }
     }
     close() {
+        var _a;
         if (this.state !== ST_STARTED) {
             return;
         }
         this.state = ST_CLOSED;
-        this.wsServer.close();
+        (_a = this.wsServer) === null || _a === void 0 ? void 0 : _a.close();
         this.wsServer = null;
         this.httpServer = null;
     }

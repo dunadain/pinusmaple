@@ -14,6 +14,9 @@ import { IModule, MonitorCallback, MasterCallback, ModuleType ,  MonitorAgent, M
 import { ServerInfo } from '../util/constants';
 import { Application } from '../application';
 import * as path from 'path';
+import { ConnectionComponent } from '../components/connection';
+import { ProxyComponent } from '../components/proxy';
+import { ServerComponent } from '../components/server';
 let logger = getLogger('pinus', path.basename(__filename));
 
 
@@ -25,10 +28,10 @@ enum HandleType {
 export class WatchServerModule implements IModule {
     static moduleId = 'watchServer';
 
-    app: Application;
+    app!: Application;
     constructor(opts ?: {app ?: Application}) {
         opts = opts || {};
-        this.app = opts.app;
+        if (opts.app) this.app = opts.app;
     }
 
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {
@@ -166,7 +169,7 @@ export class WatchServerModule implements IModule {
     }
 }
 
-function showServers(handle: HandleType, agent_: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string , data?: any) => void) {
+function showServers(handle: HandleType, agent_: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = agent_ as MasterAgent;
         let sid, record;
@@ -212,7 +215,7 @@ function showServers(handle: HandleType, agent_: MonitorAgent | MasterAgent, com
 
 }
 
-function showConnections(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application , comd: string, context: string , cb: (err?: Error | string , data?: any) => void) {
+function showConnections(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application , comd: string, context: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -264,7 +267,7 @@ function showConnections(handle: HandleType, _agent: MonitorAgent | MasterAgent,
         }
     } else if (handle === 'monitor') {
         let agent = _agent as MonitorAgent;
-        let connection = app.components.__connection__;
+        let connection = app.components.__connection__ as ConnectionComponent;
         if (!connection) {
             cb(null , {
                 serverId: agent.id,
@@ -281,11 +284,11 @@ function showConnections(handle: HandleType, _agent: MonitorAgent | MasterAgent,
 }
 
 
-function showLogins(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , cb: (err?: Error | string , data?: any) => void) {
+function showLogins(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , cb: (err?: Error | string | null, data?: any) => void) {
     showConnections(handle, _agent, app, comd, context, cb);
 }
 
-function showModules(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string , data?: any) => void) {
+function showModules(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string | null, data?: any) => void) {
     let modules = _agent.consoleService.modules;
     let result = [];
     for (let module in modules) {
@@ -296,7 +299,7 @@ function showModules(handle: HandleType, _agent: MonitorAgent | MasterAgent, com
     });
 }
 
-function showStatus(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string , data?: any) => void) {
+function showStatus(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         agent.request(context, WatchServerModule.moduleId, {
@@ -324,7 +327,7 @@ function showStatus(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd
     }
 }
 
-function showConfig(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string, cb: (err?: Error | string , data?: any) => void) {
+function showConfig(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string, cb: (err?: Error | string | null , data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (param === 'master') {
@@ -346,7 +349,7 @@ function showConfig(handle: HandleType, _agent: MonitorAgent | MasterAgent, app:
     }
 }
 
-function showProxy(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string, param: string , cb: (err?: Error | string , data?: any) => void) {
+function showProxy(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string, param: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -367,7 +370,7 @@ function showProxy(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: 
     }
 }
 
-function showHandler(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string , data?: any) => void) {
+function showHandler(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -388,7 +391,7 @@ function showHandler(handle: HandleType, _agent: MonitorAgent | MasterAgent, app
     }
 }
 
-function showComponents(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: string, cb: (err?: Error | string , data?: any) => void) {
+function showComponents(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: string, cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -415,7 +418,7 @@ function showComponents(handle: HandleType, _agent: MonitorAgent | MasterAgent, 
     }
 }
 
-function showSettings(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string , data?: any) => void) {
+function showSettings(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -448,7 +451,7 @@ function showSettings(handle: HandleType, _agent: MonitorAgent | MasterAgent, ap
     }
 }
 
-function dumpCPU(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , param: {times: number , filepath: string, force: boolean} , cb: (err?: Error | string , data?: any) => void) {
+function dumpCPU(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , param: {times: number , filepath: string, force: boolean} , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -491,7 +494,7 @@ function dumpCPU(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: s
 }
 
 
-function dumpMemory(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , param: {filepath: string, force: boolean} , cb: (err?: Error | string , data?: any) => void) {
+function dumpMemory(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , param: {filepath: string, force: boolean} , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -513,7 +516,7 @@ function dumpMemory(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd
         if (!/\.heapsnapshot$/.test(filepath)) {
             filepath = filepath + '.heapsnapshot';
         }
-        checkFilePath(filepath, force, function (err: string) {
+        checkFilePath(filepath, force, function (err) {
             if (err) {
                 cb(err);
                 return;
@@ -530,7 +533,7 @@ function dumpMemory(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd
     }
 }
 
-function getApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string , data?: any) => void) {
+function getApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -555,7 +558,7 @@ function getApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: App
     }
 }
 
-function setApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: {key: string, value: any}, cb: (err?: Error | string , data?: any) => void) {
+function setApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: {key: string, value: any}, cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -579,7 +582,7 @@ function setApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: App
     }
 }
 
-function enableApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: string, cb: (err?: Error | string , data?: any) => void) {
+function enableApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: string, cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -601,7 +604,7 @@ function enableApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: 
     }
 }
 
-function disableApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: string, cb: (err?: Error | string , data?: any) => void) {
+function disableApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string  , param: string, cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -623,7 +626,7 @@ function disableApp(handle: HandleType, _agent: MonitorAgent | MasterAgent, app:
     }
 }
 
-function runScript(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string , data?: any) => void) {
+function runScript(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: Application, comd: string, context: string , param: string , cb: (err?: Error | string | null, data?: any) => void) {
     if (handle === 'client') {
         let agent = _agent as MasterAgent;
         if (context === 'all') {
@@ -649,12 +652,12 @@ function runScript(handle: HandleType, _agent: MonitorAgent | MasterAgent, app: 
             vm.runInNewContext('result = ' + param, ctx);
             cb(null, util.inspect(ctx.result));
         } catch (e) {
-            cb(null, e.stack);
+            cb(null, (e as Error).stack);
         }
     }
 }
 
-function showError(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string , data?: any) => void) {
+function showError(handle: HandleType, _agent: MonitorAgent | MasterAgent, comd: string, context: string , cb: (err?: Error | string | null, data?: any) => void) {
 
 }
 
@@ -674,7 +677,7 @@ function clone(param: any, obj: any) {
     return result;
 }
 
-function checkFilePath(filepath: string, force: boolean, cb: (result: string) => void) {
+function checkFilePath(filepath: string, force: boolean, cb: (result: string | null) => void) {
     if (!force && fs.existsSync(filepath)) {
         cb('filepath file exist');
         return;
@@ -691,7 +694,7 @@ function checkFilePath(filepath: string, force: boolean, cb: (result: string) =>
 
 function proxyCb(app: Application, context: string, cb: MasterCallback) {
     let msg: any = {};
-    let __proxy__ = app.components.__proxy__;
+    let __proxy__ = app.components.__proxy__ as ProxyComponent;
     if (__proxy__ && __proxy__.client && __proxy__.client.proxies.user) {
         let proxies = __proxy__.client.proxies.user;
         let server = app.getServerById(context);
@@ -710,7 +713,7 @@ function proxyCb(app: Application, context: string, cb: MasterCallback) {
                     }
                 }
             }
-            cb(null, msg);
+            cb(undefined, msg);
         }
     } else {
         cb('no proxy loaded');
@@ -719,8 +722,8 @@ function proxyCb(app: Application, context: string, cb: MasterCallback) {
 
 function handlerCb(app: Application, context: string, cb: MasterCallback) {
     let msg: any = {};
-    let __server__ = app.components.__server__;
-    if (__server__ && __server__.server && __server__.server.handlerService.handlerMap) {
+    let __server__ = app.components.__server__ as ServerComponent;
+    if (__server__ && __server__.server && __server__.server.handlerService && __server__.server.handlerService.handlerMap) {
         let handles = __server__.server.handlerService.handlerMap;
         let server = app.getServerById(context);
         if (!server) {

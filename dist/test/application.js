@@ -72,7 +72,7 @@ describe('application test', function () {
                 }
             };
             app.init({ base: mockBase });
-            app.components.__monitor__ = { monitor: null, name: 'mockMonitor', start: () => { return Promise.resolve(); }, stop: () => { return Promise.resolve(); }, reconnect: () => { } };
+            app.components.__monitor__ = { /*monitor: null,*/ name: 'mockMonitor', start: () => { return Promise.resolve(); }, stop: () => { return Promise.resolve(); }, /*reconnect: () => {}*/ };
             app.load(mockComponent);
             app.start().catch(err => {
                 should.not.exist(err);
@@ -478,7 +478,7 @@ describe('application test', function () {
             let count = 0;
             this.timeout(8888);
             app.init({ base: mockBase });
-            app.components.__monitor__ = { monitor: null, name: 'mockMonitor', start: () => { return Promise.resolve(); }, stop: () => { return Promise.resolve(); }, reconnect: () => { } };
+            app.components.__monitor__ = { /*monitor: null,*/ name: 'mockMonitor', start: () => { return Promise.resolve(); }, stop: () => { return Promise.resolve(); }, /*reconnect: () => {}*/ };
             app.beforeStopHook(function () {
                 count++;
             });

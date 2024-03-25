@@ -15,7 +15,7 @@ let DEFAULT_TIMEOUT = 3000;
 let DEFAULT_SIZE = 500;
 
 export class TimeoutFilter implements IHandlerFilter {
-    timeouts: { [id: number]: NodeJS.Timeout } = {};
+    timeouts: { [id: number]: NodeJS.Timeout | undefined } = {};
     curId = 0;
     private timeOutCount = 0;
 
@@ -37,7 +37,7 @@ export class TimeoutFilter implements IHandlerFilter {
         next(null);
     }
 
-    after(err: Error, routeRecord: RouteRecord, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
+    after(err: Error | null, routeRecord: RouteRecord | null, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
         let timeout = this.timeouts[(session as any).__timeout__];
         if (timeout) {
             clearTimeout(timeout);

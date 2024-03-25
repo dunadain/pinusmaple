@@ -46,8 +46,8 @@ export function publish(opts: any) {
 
 /* Requires length be a number > 0 */
 let gen_length = function (length: number) {
-    if (typeof length !== 'number') return null;
-    if (length < 0) return null;
+    if (typeof length !== 'number') return 0;
+    if (length < 0) return 0;
 
     let len = [];
     let digit = 0;

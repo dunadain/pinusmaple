@@ -23,8 +23,8 @@ export class MQTTSocket extends EventEmitter implements ISocket {
         this.id = id;
         this.socket = socket;
         this.remoteAddress = {
-            ip: socket.stream.remoteAddress,
-            port: socket.stream.remotePort
+            ip: socket.stream.remoteAddress!,
+            port: socket.stream.remotePort!
         };
         this.adaptor = adaptor;
 

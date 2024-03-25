@@ -26,7 +26,7 @@ export default function (program: Command) {
 function restart(opts: any) {
     let id = 'pinus_restart_' + Date.now();
     let serverIds: string[] = [];
-    let type: string = null;
+    let type = '';
     if (!!opts.id) {
         serverIds.push(opts.id);
     }
@@ -34,7 +34,7 @@ function restart(opts: any) {
         type = opts.type;
     }
     connectToMaster(id, opts, function (client) {
-        client.request(co.moduleId, { signal: 'restart', ids: serverIds, type: type }, function (err: Error, fails: string[]) {
+        client.request(co.moduleId, { signal: 'restart', ids: serverIds, type: type }, function (err, fails: string[]) {
             if (!!err) {
                 console.error(err);
             } else if (!!fails.length) {

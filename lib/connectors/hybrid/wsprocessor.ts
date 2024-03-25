@@ -11,8 +11,8 @@ let ST_CLOSED = 2;
  * websocket protocol processor
  */
 export class WSProcessor extends EventEmitter {
-    httpServer: HttpServer;
-    wsServer: WebSocket.Server;
+    httpServer: HttpServer | null;
+    wsServer: WebSocket.Server | null;
     state: number;
 
     constructor() {
@@ -35,7 +35,7 @@ export class WSProcessor extends EventEmitter {
         if (this.state !== ST_STARTED) {
             return;
         }
-        this.httpServer.emit('connection', socket);
+        this.httpServer?.emit('connection', socket);
         if (typeof (socket as any).ondata === 'function') {
             // compatible with stream2
             (socket as any).ondata(data, 0, data.length);
@@ -50,7 +50,7 @@ export class WSProcessor extends EventEmitter {
             return;
         }
         this.state = ST_CLOSED;
-        this.wsServer.close();
+        this.wsServer?.close();
         this.wsServer = null;
         this.httpServer = null;
     }

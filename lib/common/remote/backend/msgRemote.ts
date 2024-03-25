@@ -4,6 +4,8 @@ import { Application } from '../../../application';
 import { BackendSession } from '../../service/backendSessionService';
 import * as path from 'path';
 import { ISession } from '../../service/sessionService';
+import { BackendSessionComponent } from '../../../components/backendSession';
+import { ServerComponent } from '../../../components/server';
 
 let logger = getLogger('forward-log', path.basename(__filename));
 /**
@@ -30,8 +32,8 @@ export class MsgRemote {
      */
     forwardMessage(msg: any, session: ISession) {
         return new Promise<any>((resolve, reject) => {
-            let server = this.app.components.__server__;
-            let sessionService = this.app.components.__backendSession__;
+            let server = this.app.components.__server__ as ServerComponent;
+            let sessionService = this.app.components.__backendSession__ as BackendSessionComponent;
 
             if (!server) {
                 logger.error('server component not enable on %s', this.app.serverId);

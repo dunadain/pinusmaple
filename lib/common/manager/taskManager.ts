@@ -46,5 +46,5 @@ export function closeQueue(key: number, force: boolean) {
     }
 
     queues[key].close(force);
-    queues[key] = undefined;
+    delete queues[key];
 }

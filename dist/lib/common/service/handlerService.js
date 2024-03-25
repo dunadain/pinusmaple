@@ -127,8 +127,10 @@ class HandlerService {
             targetPaths = new Set();
             this.handlerPaths[serverInfo.serverType] = targetPaths;
         }
-        for (let path of serverInfo.handlerPaths) {
-            targetPaths.add(path);
+        if (serverInfo.handlerPaths) {
+            for (let path of serverInfo.handlerPaths) {
+                targetPaths.add(path);
+            }
         }
     }
     /**
@@ -151,7 +153,9 @@ function manualReloadHandlers(app) {
         return;
     }
     const handlerMap = app.components.__server__.server.handlerService.handlerMap;
-    handlerMap[app.serverType] = Loader.load(p, app, true, true, pinus_loader_1.LoaderPathType.PINUS_HANDLER);
+    const handler = Loader.load(p, app, true, true, pinus_loader_1.LoaderPathType.PINUS_HANDLER);
+    if (handler)
+        handlerMap[app.serverType] = handler;
 }
 exports.manualReloadHandlers = manualReloadHandlers;
 let watchHandlers = function (app, handlerMap) {
@@ -159,7 +163,11 @@ let watchHandlers = function (app, handlerMap) {
     if (!!p) {
         fs.watch(p, function (event, name) {
             if (event === 'change') {
-                handlerMap[app.serverType] = Loader.load(p, app, true, true, pinus_loader_1.LoaderPathType.PINUS_HANDLER);
+                if (p) {
+                    const handler = Loader.load(p, app, true, true, pinus_loader_1.LoaderPathType.PINUS_HANDLER);
+                    if (handler)
+                        handlerMap[app.serverType] = handler;
+                }
             }
         });
     }

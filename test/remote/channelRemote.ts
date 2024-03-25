@@ -157,7 +157,7 @@ describe('channel remote test', function () {
                     mockMsg.should.eql(msg);
                     should.exist(opts);
                     should.equal(opts.type, 'broadcast');
-                    true.should.equal(opts.userOptions.binded);
+                    true.should.equal(opts.userOptions!.binded);
                     cb();
                 }
             };

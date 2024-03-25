@@ -22,7 +22,8 @@ var HandleType;
 class WatchServerModule {
     constructor(opts) {
         opts = opts || {};
-        this.app = opts.app;
+        if (opts.app)
+            this.app = opts.app;
     }
     monitorHandler(agent, msg, cb) {
         let comd = msg['comd'];
@@ -679,7 +680,7 @@ function proxyCb(app, context, cb) {
                     }
                 }
             }
-            cb(null, msg);
+            cb(undefined, msg);
         }
     }
     else {
@@ -689,7 +690,7 @@ function proxyCb(app, context, cb) {
 function handlerCb(app, context, cb) {
     let msg = {};
     let __server__ = app.components.__server__;
-    if (__server__ && __server__.server && __server__.server.handlerService.handlerMap) {
+    if (__server__ && __server__.server && __server__.server.handlerService && __server__.server.handlerService.handlerMap) {
         let handles = __server__.server.handlerService.handlerMap;
         let server = app.getServerById(context);
         if (!server) {

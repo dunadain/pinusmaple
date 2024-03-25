@@ -52,7 +52,7 @@ export class PushSchedulerComponent implements IComponent {
      * @param  {Object}   opts  options
      * @param  {Function} cb
      */
-    schedule(reqId: number, route: string, msg: any, recvs: SID[], opts: ScheduleOptions, cb: (err?: Error) => void) {
+    schedule(reqId: number, route: string, msg: any, recvs: SID[] | null, opts: ScheduleOptions, cb: (err?: Error) => void) {
         this.scheduler.schedule(reqId, route, msg, recvs, opts, cb);
     }
 }

@@ -33,7 +33,7 @@ function closeQueue(key, force) {
         return;
     }
     queues[key].close(force);
-    queues[key] = undefined;
+    delete queues[key];
 }
 exports.closeQueue = closeQueue;
 //# sourceMappingURL=taskManager.js.map

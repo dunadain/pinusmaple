@@ -14,7 +14,7 @@ let HEAD_SIZE = 4;
  * websocket protocol processor
  */
 export class TCPProcessor extends EventEmitter {
-    closeMethod: 'end';
+    closeMethod: 'end' | undefined;
     state: number;
     constructor(closeMethod?: 'end') {
         super();

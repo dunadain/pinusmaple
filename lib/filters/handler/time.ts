@@ -18,12 +18,12 @@ export class TimeFilter implements IHandlerFilter {
         next(null);
     }
 
-    after(err: Error, routeRecord: RouteRecord, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
+    after(err: Error | null, routeRecord: RouteRecord | null, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
         let start = (session as any).__startTime__;
         if (typeof start === 'number') {
             let timeUsed = Date.now() - start;
             let log = {
-                route: routeRecord.route,
+                route: routeRecord?.route,
                 args: msg,
                 time: utils.format(new Date(start)),
                 timeUsed: timeUsed

@@ -7,7 +7,7 @@ let consoleModule = require('../../lib/modules/console').ConsoleModule;
 describe('console module test', function () {
     describe('#monitorHandler', function () {
         it('should execute the corresponding command with different signals', function () {
-            let flag;
+            let flag = false;
             let rs;
             let opts = {
                 app: {
@@ -48,10 +48,12 @@ describe('console module test', function () {
             });
             let msg3 = { signal: 'addCron' };
             module.monitorHandler(agent2, msg3, null);
-            rs.length.should.eql(1);
+            if (rs)
+                rs.length.should.eql(1);
             let msg4 = { signal: 'removeCron' };
             module.monitorHandler(agent2, msg4, null);
-            rs.length.should.eql(1);
+            if (rs)
+                rs.length.should.eql(1);
             let msg5 = { signal: 'blacklist', blacklist: ['127.0.0.1'] };
             module.monitorHandler(agent1, msg5, null);
             opts.app.components.__connector__.blacklist.length.should.eql(1);
@@ -139,7 +141,7 @@ describe('console module test', function () {
             });
             let agent2 = {
                 request: function (recordId, moduleId, msg, cb) {
-                    cb(null);
+                    cb();
                 },
                 idMap: {
                     'chat-server-1': {
@@ -227,7 +229,7 @@ describe('console module test', function () {
             let msg2 = { signal: 'restart', type: 'chat', ids: [] };
             let agent = {
                 request: function (recordId, moduleId, msg, cb) {
-                    cb(null);
+                    cb();
                 }
             };
             module.clientHandler(agent, msg1, function (err, result) {

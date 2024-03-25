@@ -151,7 +151,7 @@ describe('session service test', function () {
 
       let session = service.create(sid, fid, socket);
 
-      service.import(sid, key, value, function (err: Error) {
+      service.import(sid, key, value, function (err) {
         should.not.exist(err);
         value.should.eql(session.get(key));
         done();
@@ -163,7 +163,7 @@ describe('session service test', function () {
       let sid = 1;
       let key = 'key-1', value = 'value-1';
 
-      service.import(sid, key, value, function (err: Error) {
+      service.import(sid, key, value, function (err) {
         should.exist(err);
         done();
       });
@@ -180,7 +180,7 @@ describe('session service test', function () {
 
       let session = service.create(sid, fid, socket);
 
-      service.importAll(sid, settings, function (err: Error) {
+      service.importAll(sid, settings, function (err) {
         should.not.exist(err);
         value.should.eql(session.get(key));
         value2.should.eql(session.get(key2));
@@ -193,7 +193,7 @@ describe('session service test', function () {
       let sid = 1;
       let key = 'key-1', value = 'value-1';
 
-      service.import(sid, key, value, function (err: Error) {
+      service.import(sid, key, value, function (err) {
         should.exist(err);
         done();
       });
@@ -208,7 +208,7 @@ describe('session service test', function () {
       settings[key] = value;
       settings[key2] = value2;
 
-      service.importAll(sid, settings, function (err: Error) {
+      service.importAll(sid, settings, function (err) {
         should.exist(err);
         done();
       });
@@ -467,7 +467,7 @@ describe('frontend session test', function () {
       fsession.set(key, value);
       fsession.set(key2, value2);
 
-      fsession.push(key, function (err: Error) {
+      fsession.push(key, function (err) {
         should.not.exist(err);
         value.should.eql(session.get(key));
         should.not.exist(session.get(key2));
@@ -486,7 +486,7 @@ describe('frontend session test', function () {
       fsession.set(key, value);
       fsession.set(key2, value2);
 
-      fsession.pushAll(function (err: Error) {
+      fsession.pushAll(function (err) {
         should.not.exist(err);
         value.should.eql(session.get(key));
         value2.should.eql(session.get(key2));
