@@ -789,14 +789,14 @@ export class Application {
     configure(env: string, fn: ConfigureCallback): Application;
     configure(env: string, type: string, fn: ConfigureCallback): Application;
     configure(env: string | ConfigureCallback, type ?: string | ConfigureCallback, fn ?: ConfigureCallback): Application {
-        let args = arguments;
-        fn = args[args.length - 1];
+        let args = Array.from(arguments);
+        fn = args.pop();
         env = type = Constants.RESERVED.ALL;
 
-        if (args.length > 1) {
+        if (args.length > 0) {
             env = args[0];
         }
-        if (args.length > 2) {
+        if (args.length > 1) {
             type = args[1];
         }
 

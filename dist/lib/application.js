@@ -537,13 +537,13 @@ class Application {
         return this.set(setting, false);
     }
     configure(env, type, fn) {
-        let args = arguments;
-        fn = args[args.length - 1];
+        let args = Array.from(arguments);
+        fn = args.pop();
         env = type = Constants.RESERVED.ALL;
-        if (args.length > 1) {
+        if (args.length > 0) {
             env = args[0];
         }
-        if (args.length > 2) {
+        if (args.length > 1) {
             type = args[1];
         }
         if (env === Constants.RESERVED.ALL || contains(this.settings.env, env)) {

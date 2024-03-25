@@ -329,6 +329,7 @@ let inLocal = function (host) {
     return false;
 };
 let localIps = function () {
+    var _a;
     let ifaces = os.networkInterfaces();
     let ips = [];
     let func = function (details) {
@@ -336,8 +337,10 @@ let localIps = function () {
             ips.push(details.address);
         }
     };
-    for (let dev in ifaces) {
-        ifaces[dev].forEach(func);
+    if (ifaces !== undefined) {
+        for (let dev in ifaces) {
+            (_a = ifaces[dev]) === null || _a === void 0 ? void 0 : _a.forEach(func);
+        }
     }
     return ips;
 }();

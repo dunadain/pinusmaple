@@ -82,7 +82,7 @@ export function arrayDiff<T extends string>(array1: Array<T>, array2: Array<T>) 
         o[array2[i]] = true;
     }
 
-    let result = [];
+    let result:T[] = [];
     for (let i = 0, len = array1.length; i < len; i++) {
         let v = array1[i];
         if (o[v]) continue;
@@ -341,8 +341,10 @@ let localIps = function () {
             ips.push(details.address);
         }
     };
-    for (let dev in ifaces) {
-        ifaces[dev].forEach(func);
+    if (ifaces !== undefined) {
+        for (let dev in ifaces) {
+            ifaces[dev]?.forEach(func);
+        }
     }
     return ips;
 }();

@@ -156,7 +156,7 @@ export class ProtobufComponent implements IComponent {
         delete require.cache[path];
     }
 
-    onUpdate(type: string, path: string, event: string, filename?: string, errTry?: boolean) {
+    onUpdate(type: string, path: string, event: string, filename?: string | null, errTry?: boolean) {
         if (event !== 'change') {
             return;
         }
