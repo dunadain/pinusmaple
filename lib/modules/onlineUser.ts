@@ -17,7 +17,7 @@ export class OnlineUserModule implements IModule {
 
     static moduleId = 'onlineUser';
 
-    app: Application;
+    app: Application | undefined;
     type: ModuleType;
     interval: number;
 
@@ -37,7 +37,7 @@ export class OnlineUserModule implements IModule {
     * @api public
     */
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {
-        let connectionService = this.app.components.__connection__ as ConnectionComponent;
+        let connectionService = this.app?.components.__connection__ as ConnectionComponent;
         if (!connectionService) {
             logger.error('not support connection: %j', agent.id);
             return;

@@ -43,7 +43,7 @@ class HandshakeCommand {
         let opts = {
             heartbeat: setupHeartbeat(this)
         };
-        if (this.useDict) {
+        if (this.useDict && pinus_1.pinus.app) {
             const dict = pinus_1.pinus.app.components.__dictionary__;
             let dictVersion = dict.getVersion();
             if (!msg.sys.dictVersion || msg.sys.dictVersion !== dictVersion) {
@@ -56,7 +56,7 @@ class HandshakeCommand {
             }
             opts.useDict = true;
         }
-        if (this.useProtobuf) {
+        if (this.useProtobuf && pinus_1.pinus.app) {
             const pbc = pinus_1.pinus.app.components.__protobuf__;
             let protoVersion = pbc.getVersion();
             if (!msg.sys.protoVersion || msg.sys.protoVersion !== protoVersion) {
@@ -64,7 +64,7 @@ class HandshakeCommand {
             }
             opts.useProto = true;
         }
-        if (!!pinus_1.pinus.app.components.__decodeIO__protobuf__) {
+        if (pinus_1.pinus.app && !!pinus_1.pinus.app.components.__decodeIO__protobuf__) {
             if (!!this.useProtobuf) {
                 throw new Error('protobuf can not be both used in the same project.');
             }
@@ -75,7 +75,7 @@ class HandshakeCommand {
             }
             opts.useProto = true;
         }
-        if (this.useCrypto) {
+        if (this.useCrypto && pinus_1.pinus.app) {
             if (socket.id)
                 pinus_1.pinus.app.components.__connector__.setPubKey(socket.id, msg.sys.rsa);
         }

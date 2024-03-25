@@ -211,7 +211,7 @@ export function checkPort(server: ServerInfo, cb: (result: string) => void) {
     let host = server.host;
     let generateCommand = function (host: string, port: number) {
         let cmd;
-        let ssh_params = pinus.app.get(Constants.RESERVED.SSH_CONFIG_PARAMS);
+        let ssh_params = pinus.app?.get(Constants.RESERVED.SSH_CONFIG_PARAMS);
         if (!!ssh_params && Array.isArray(ssh_params)) {
             ssh_params = ssh_params.join(' ');
         }

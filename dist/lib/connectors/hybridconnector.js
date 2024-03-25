@@ -52,10 +52,12 @@ class HybridConnector extends events_1.EventEmitter {
             hybridsocket.on('closing', Kick.handle.bind(null, hybridsocket));
             self.emit('connection', hybridsocket);
         };
-        this.connector = app.components.__connector__.connector;
-        this.dictionary = app.components.__dictionary__;
-        this.protobuf = app.components.__protobuf__;
-        this.decodeIO_protobuf = app.components.__decodeIO__protobuf__;
+        if (app) {
+            this.connector = app.components.__connector__.connector;
+            this.dictionary = app.components.__dictionary__;
+            this.protobuf = app.components.__protobuf__;
+            this.decodeIO_protobuf = app.components.__decodeIO__protobuf__;
+        }
         if (!this.ssl) {
             this.listeningServer = net.createServer();
         }

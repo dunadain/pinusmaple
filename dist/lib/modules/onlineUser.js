@@ -28,7 +28,8 @@ class OnlineUserModule {
     * @api public
     */
     monitorHandler(agent, msg, cb) {
-        let connectionService = this.app.components.__connection__;
+        var _a;
+        let connectionService = (_a = this.app) === null || _a === void 0 ? void 0 : _a.components.__connection__;
         if (!connectionService) {
             logger.error('not support connection: %j', agent.id);
             return;

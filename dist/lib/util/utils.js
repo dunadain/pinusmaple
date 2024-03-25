@@ -202,8 +202,9 @@ function checkPort(server, cb) {
     let port = (_b = (_a = server.port) !== null && _a !== void 0 ? _a : server.clientPort) !== null && _b !== void 0 ? _b : 0;
     let host = server.host;
     let generateCommand = function (host, port) {
+        var _a;
         let cmd;
-        let ssh_params = pinus_1.pinus.app.get(Constants.RESERVED.SSH_CONFIG_PARAMS);
+        let ssh_params = (_a = pinus_1.pinus.app) === null || _a === void 0 ? void 0 : _a.get(Constants.RESERVED.SSH_CONFIG_PARAMS);
         if (!!ssh_params && Array.isArray(ssh_params)) {
             ssh_params = ssh_params.join(' ');
         }
