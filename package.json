@@ -58,7 +58,7 @@
     "mqtt-connection": "^4.1.0",
     "node-bignumber": "^1.2.1",
     "pinus-admin": "github:dunadain/pinusmaple-admin#main",
-    "pinus-loader": "github:dunadain/pinusmaple-loader#main",
+    "pinus-loader": "^1.7.1",
     "pinus-logger": "github:dunadain/pinusmaple-logger#main",
     "pinus-protobuf": "github:dunadain/pinusmaple-protobuf#main",
     "pinus-protocol": "github:dunadain/pinusmaple-protocol#main",
