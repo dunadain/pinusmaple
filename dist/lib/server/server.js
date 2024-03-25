@@ -427,21 +427,18 @@ let doHandle = function (server, msg, session, routeRecord, cb) {
             });
             return;
         }
-        if (routeRecord) {
-            (_a = self.handlerService) === null || _a === void 0 ? void 0 : _a.handle(routeRecord, msg, session, function (err, resp) {
-                if (err) {
-                    // error from handler
-                    handleError(false, self, err, msg, session, resp, function (err, resp) {
-                        response(false, self, err, routeRecord, msg, session, resp, cb);
-                    });
-                    return;
-                }
-                response(false, self, err, routeRecord, msg, session, resp, cb);
-            });
-        }
+        (_a = self.handlerService) === null || _a === void 0 ? void 0 : _a.handle(routeRecord, msg, session, function (err, resp) {
+            if (err) {
+                // error from handler
+                handleError(false, self, err, msg, session, resp, function (err, resp) {
+                    response(false, self, err, routeRecord, msg, session, resp, cb);
+                });
+                return;
+            }
+            response(false, self, err, routeRecord, msg, session, resp, cb);
+        });
     }; // end of handle
-    if (routeRecord)
-        beforeFilter(false, server, routeRecord, msg, session, handle);
+    beforeFilter(false, server, routeRecord, msg, session, handle);
 };
 /**
  * Schedule crons

@@ -470,22 +470,20 @@ let doHandle = function (server: Server, msg: any, session: FrontendOrBackendSes
             return;
         }
 
-        if (routeRecord) {
-            self.handlerService?.handle(routeRecord, msg, session, function (err, resp) {
-                if (err) {
-                    // error from handler
-                    handleError(false, self, err, msg, session, resp, function (err, resp) {
-                        response(false, self, err, routeRecord, msg, session, resp, cb);
-                    });
-                    return;
-                }
-    
-                response(false, self, err, routeRecord, msg, session, resp, cb);
-            });
-        }
+        self.handlerService?.handle(routeRecord as any, msg, session, function (err, resp) {
+            if (err) {
+                // error from handler
+                handleError(false, self, err, msg, session, resp, function (err, resp) {
+                    response(false, self, err, routeRecord, msg, session, resp, cb);
+                });
+                return;
+            }
+
+            response(false, self, err, routeRecord, msg, session, resp, cb);
+        });
     };  // end of handle
 
-    if (routeRecord) beforeFilter(false, server, routeRecord, msg, session, handle);
+    beforeFilter(false, server, routeRecord as any, msg, session, handle);
 };
 
 /**
